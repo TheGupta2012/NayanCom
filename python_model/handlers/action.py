@@ -28,9 +28,7 @@
 # 5. Repeat
 
 from ..models.mappers import REQUEST_MAP 
-
-# for text 
-import twilio 
+from .alert import send_alerts
 
 # for locking
 from fasteners import InterProcessLock
@@ -51,7 +49,6 @@ class ActionHandler:
     
     confirms = ["Alright!", "Perfect!", "Okay sure!", "Sure!",
                 "Okay!", "Awesome!"]
-    
         
     def __init__(self, caretaker) -> None:
         # network details
@@ -61,13 +58,7 @@ class ActionHandler:
         # not really sure...
         # self.em_phone = caretaker.em_service
     
-    def check_patient_status(self, patient):
-        
-        view = patient.in_view 
-        vitals = patient.vitals_detected 
-        return (vitals and view)
-    
-    
+
     def update_model_vars(self, patient):
         
         # here, we need to lock the file 
@@ -127,7 +118,7 @@ class ActionHandler:
                 if prev_state == "IDLE":
                     text["play"] = "Model is activated."
                 else:
-                    text["play"] = "Not sure if we understood that. Could you "
+                    text["play"] = "Not sure if we understood that. Please try to select again."
                 
             elif curr_state == "GOT ROW":
                 text["play"] = greeting + ", you have selected row " + str(row_selected)
@@ -152,15 +143,22 @@ class ActionHandler:
                 # here, the alert is sent and we need to reset our models
                 cv_model.reset_model()
             else:
+                
                 # patient in state of emergency
                 text["play"] = "Please stay calm. Help is on the way."
                 text["text"] = "Patient requires immediate attention. Please hurry."
+                
+                # means we send 3-4 messages to the person themselves
                 em_state = True 
                 
                 cv_model.reset_model()
             
-            self.play_sound(text["play"])
-            self.send_alerts(text["text"], em_state)
+        if len(text["text"]) > 0:
+            send_alerts(text["text"], self.email, em_state)
+        
+        # say the confirmation sounds 
+        self.play_sound(text["play"])
+        
     
     def handle_vitals(self, patient, vital_model):
         # there is no sound here 
@@ -189,10 +187,9 @@ class ActionHandler:
                     text+= f"\nOxygen level critical : {patient.o2_level}%"
                 em_state = True 
               
-            self.send_alerts(text, em_state)
+            self.send_alerts(text, self.email, em_state)
         
         vital_model.reset_model()
-        # not required to send the text to em service directly 
         
     def play_sound(self, text):
         sound_fp = "../data/sound.mp3"
@@ -203,17 +200,6 @@ class ActionHandler:
         system("mpg123 " + sound_fp)
         
         
-    def send_alerts(self, text, em_state):
-        # uses the text module to send the alert
-        # email or phone 
-        
-        # try to send text messages only 
-        
-        # first need to set the env vars 
-        # then, verify the caretaker's number 
-        # after that, you can send the message alerts 
-        
-        pass 
         
     
                 

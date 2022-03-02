@@ -2,16 +2,19 @@ from json import load
 
 class Patient:
     def __init__(self) -> None:
-        # requests
         self.in_view = False
-        self.requesting = False
-        self.request = None 
-        
+
         # vitals
         self.vitals_detected = False 
         self.heart_rate = None 
         self.o2_level = None 
         
+    def detected(self, patient):
+ 
+        view = patient.in_view 
+        vitals = patient.vitals_detected 
+        return (vitals and view)
+    
 
 class Caretaker:
     def __init__(self) -> None:

@@ -97,7 +97,6 @@ class CVDataHandler:
 class VitalDataHandler:
     """Updates the model data with respect to 
        the Vital Model"""
-       
     
     def __init__(self) -> None:
         self.state = Vitals.NORMAL

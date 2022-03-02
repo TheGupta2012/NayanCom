@@ -1,10 +1,12 @@
 
 from enum import Enum
+
 REQUEST_MAP = {
     1 : {1 : "WATER", 2 : "FOOD", 3 : "WASHROOM"}, 
-    2 : {1 : "BODYACHES", 2 : "COLD AND COUGH", 3 : "HEADACHES"},
-    3 : {1 : "...", 2 : "...", 3 : "..."}
+    2 : {1 : "BODYACHE", 2 : "COLD AND COUGH", 3 : "HEADACHE"},
+    3 : {1 : "LIMB PAIN", 2 : "FATIGUE", 3 : "CHEST PAIN"}
 }
+
 class CV(Enum):
     IDLE = 0
     ACTIVATE = 1
