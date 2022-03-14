@@ -1,4 +1,3 @@
-
 from ..models.mappers import  VitalLevels, CV, Vitals 
 # assuming that the cv model will return the 
 # number of blinks and whether the face is in view or 
@@ -14,7 +13,7 @@ class CVDataHandler:
         self.row = None 
         self.col = None 
         
-    def recieve_data(self, patient, data):
+    def receive_data(self, patient, data):
         # data is present as : 
             # face_in_view : Boolean
             # number of blinks : Int
@@ -22,7 +21,6 @@ class CVDataHandler:
             
         in_view = data["in_view"]
         patient.in_view = in_view
-        
         
         if in_view:
             # try to do something 
@@ -103,7 +101,7 @@ class VitalDataHandler:
         self.heart_danger = False 
         self.o2_danger = False
     
-    def recieve_data(self, patient, data):
+    def receive_data(self, patient, data):
         # data is present as : 
             # heart rate : Int
             # o2 level : Float 
@@ -148,7 +146,7 @@ class VitalDataHandler:
            
     def reset_model(self):
         """Tries to reset the state of the model for the 
-           recieving of new data"""
+           receiving of new data"""
         # it will be called when the text field is sent OR 
         # the request to EM services is sent OR 
         self.state = Vitals.NORMAL

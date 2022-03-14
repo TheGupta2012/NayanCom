@@ -26,7 +26,7 @@ def send_alerts(text, to_email, em_state = False):
     
     to_send = message.as_string()
     context = ssl.create_default_context()
-
+    
     with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
         server.login("harshit.iotdev@gmail.com", PASSWORD)
         
@@ -38,7 +38,9 @@ def send_alerts(text, to_email, em_state = False):
                 for _ in range(3):
                     server.sendmail(SENDER_EMAIL, to_email, to_send)
             sent = True 
-    
+
+# alert link embed in message 
+
 
 # can use QuickSend api but not really required I guess. 
 

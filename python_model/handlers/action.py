@@ -31,7 +31,7 @@ from ..models.mappers import REQUEST_MAP
 from .alert import send_alerts
 
 # for locking
-from fasteners import InterProcessLock
+from fasteners import InterProcessLock # platform agnostic
 from json import dump  
 
 # for tts 
@@ -187,7 +187,7 @@ class ActionHandler:
                     text+= f"\nOxygen level critical : {patient.o2_level}%"
                 em_state = True 
               
-            self.send_alerts(text, self.email, em_state)
+            send_alerts(text, self.email, em_state)
         
         vital_model.reset_model()
         
