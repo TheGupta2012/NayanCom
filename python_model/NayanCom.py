@@ -3,9 +3,16 @@ from .handlers.data import CVDataHandler, VitalDataHandler
 
 # # get the actors
 from .models.actors import Patient, Caretaker 
-
+from .models.open_cv import get_args , get_cv_data 
 # # get the serial module
 import serial
+
+# cv modules
+import dlib
+from imutils.video import VideoStream
+import imutils
+
+
 
 # # generate the actors 
 patient = Patient()
@@ -13,6 +20,28 @@ caretaker = Caretaker()
 
 # # start the data recording 
 cv_model = None # TO DO - by aryaman, CV_Model()
+cv_args = get_args()
+
+# cv data 
+face_detector = dlib.get_frontal_face_detector()
+predictor = dlib.shape_predictor(args['shape_predictor'])
+
+COUNTER = 0
+TOTAL = 0
+
+RETURN_THRESH = {
+                    "MIN" : 150,
+                    "MAX" : 360
+                }
+
+
+(lStart, lEnd) = imutils.face_utils.FACIAL_LANDMARKS_IDXS['left_eye']
+(rStart, rEnd) = imutils.face_utils.FACIAL_LANDMARKS_IDXS['right_eye']
+
+RET_TIME = RETURN_THRESH.MIN
+frame_count = 0
+# cv data
+
 
 cv_data_model = CVDataHandler()
 vital_data_model = VitalDataHandler()
@@ -52,7 +81,11 @@ while True:
         patient.vitals_detected = False 
         
     try:
-        cv_data = None # TO DO:  recieve data from aryaman's model 
+        frame = vs.read()
+        frame = imutils.resize(frame, width=450)
+        frame_count += 1
+        
+        cv_data = get_cv_data(frame, frame_count, RET_TIME) # TO DO:  recieve data from aryaman's model 
         cv_data_model.receive_data(patient, data= cv_data)
     except:
         patient.in_view = False 
