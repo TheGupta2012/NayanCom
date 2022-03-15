@@ -4,7 +4,6 @@ from imutils.video import VideoStream
 from imutils import face_utils
 import time
 import argparse
-import numpy as np
 import imutils
 import cv2
 import dlib
@@ -24,13 +23,21 @@ ap.add_argument('-p', '--shape-predictor', required=True, help='path to facial l
 ap.add_argument('-v', '--video', type=str, default="", help='path to input video file')
 args = vars(ap.parse_args())
 
+# def get_args():
+#     ap = argparse.ArgumentParser()
+#     ap.add_argument('-p', '--shape-predictor', required=True, help='path to facial landmark predictor')
+#     ap.add_argument('-v', '--video', type=str, default="", help='path to input video file')
+#     args = vars(ap.parse_args())
+    
+#     return args 
+
 EYE_AR_THRESH = 0.3
 EYE_AR_CONSEC_FRAMES = [15, 45]
 
 COUNTER = 0
 TOTAL = 0
 
-RETURN_THRESH = [150, 600]
+RETURN_THRESH = [150, 360]
 
 print('[INFO] Loading facial landmark predictor...')
 detector = dlib.get_frontal_face_detector()
@@ -56,7 +63,7 @@ while True:
         break
 
     frame = vs.read()
-    frame = imutils.resize(frame, width=450)
+    frame = imutils.resize(frame, width=100)
     frame_count += 1
     if frame_count >= RET_TIME:
         #IDLE STATE
@@ -66,6 +73,7 @@ while True:
 
     rects = detector(gray, 0)
 
+    print(len(rects))
     for rect in rects:
         shape = predictor(gray, rect)
         shape = face_utils.shape_to_np(shape)
@@ -97,7 +105,7 @@ while True:
 
         cv2.putText(frame, "Blinks: {}".format(TOTAL), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
         cv2.putText(frame, "EAR: {:.2f}".format(ear), (300, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-        #cv2.putText(frame, "FC: {:.2f}".format(frame_count), (150, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+        cv2.putText(frame, "FC: {:.2f}".format(frame_count), (150, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
 
     cv2.imshow("Frame", frame)
