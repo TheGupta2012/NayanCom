@@ -1,10 +1,7 @@
 from scipy.spatial import distance as dist
-from imutils.video import VideoStream
-import imutils
 import time
 import argparse
 import cv2
-import dlib
 
 
 def eye_aspect_ratio(eye):
@@ -31,11 +28,6 @@ EYE_AR_CONSEC_FRAMES = [15, 45]
 
 
 # print('[INFO] Loading facial landmark predictor...')
-face_detector = dlib.get_frontal_face_detector()
-predictor = dlib.shape_predictor(args['shape_predictor'])
-
-(lStart, lEnd) = imutils.face_utils.FACIAL_LANDMARKS_IDXS['left_eye']
-(rStart, rEnd) = imutils.face_utils.FACIAL_LANDMARKS_IDXS['right_eye']
 
 print('[INFO] Starting video stream thread...')
 
@@ -54,10 +46,6 @@ def get_cv_data(frame, frame_count, RET_TIME):
         "idle" : False, 
         "num_blinks" : 0
     }
-    
-    frame = vs.read()
-    frame = imutils.resize(frame, width=450)
-    frame_count += 1
     
     try:
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)

@@ -85,6 +85,11 @@ while True:
         frame = imutils.resize(frame, width=450)
         frame_count += 1
         
+        # we need to have data here for the detection of the number of blinks 
+        # of the patient 
+        
+        
+        # this is only called after the 
         cv_data = get_cv_data(frame, frame_count, RET_TIME) # TO DO:  recieve data from aryaman's model 
         cv_data_model.receive_data(patient, data= cv_data)
     except:
