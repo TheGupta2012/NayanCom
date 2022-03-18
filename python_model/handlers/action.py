@@ -28,18 +28,20 @@
 # 5. Repeat
 
 from ..models.mappers import REQUEST_MAP 
+from ..models.mappers import VitalLevels, CV, Vitals
 from .alert import send_alerts
 
 # for locking
 # from fasteners import InterProcessLock # platform agnostic
 from json import dump  
 
-# for tts 
-# from gtts import gTTS
+#for tts 
+from gtts import gTTS
 import random 
-from os import system
-
-
+import os
+import pygame
+import time
+from mutagen.mp3 import MP3
 class ActionHandler:
     
     greets = ["Hey there", "Hi", "Hey", "Hi there"]
@@ -97,14 +99,16 @@ class ActionHandler:
         curr_state = cv_model.curr_state
         
         text = {"play" : "", 
-                "send" : ""}
+                "text" : ""}
         em_state = False
         
-        if curr_state == "IDLE":
-            if prev_state != "IDLE":
+        if curr_state == CV.IDLE:
+            if prev_state != CV.IDLE:
                 # need to inform them 
-                text["play"] = "Not sure if you're there. Deactivating model for now"
-                cv_model.reset_model()
+                text["play"] = "Not sure if you're there. Deactivating model for now."
+            else:
+                text["play"] = "Not started now."
+            cv_model.reset_model()
         else:
             
             greeting = random.choice(self.greets)
@@ -115,39 +119,40 @@ class ActionHandler:
             if cv_model.col is not None:
                 col_selected = cv_model.col 
                 
-            if curr_state == "ACTIVATE":
-                if prev_state == "IDLE":
-                    text["play"] = "Model is activated."
+            if curr_state == CV.ACTIVATE:
+                if prev_state == CV.IDLE:
+                    text["play"] = "Model is activated.\n"
                 else:
-                    text["play"] = "Not sure if we understood that. Please try to select again."
+                    text["play"] = "Not sure if we understood that. Please try to select again.\n"
                 
-            elif curr_state == "GOT ROW":
-                text["play"] = greeting + ", you have selected row " + str(row_selected)
-                text["play"] += "Please blink once to confirm"
+            elif curr_state == CV.GOT_ROW:
+                text["play"] = greeting + ", you have selected row " + str(row_selected) +".\n"
+                text["play"] += "Please blink once to confirm.\n"
                 
-            elif curr_state == "CONFIRM ROW":
-                text["play"] = confirmation + " Row " + str(row_selected) + " confirmed!"
+            elif curr_state == CV.CONFIRM_ROW:
+                text["play"] = confirmation + " Row " + str(row_selected) + " confirmed!\n"
             
-            elif curr_state == "GOT COL":
-                text["play"] = greeting + ", you have selected " + REQUEST_MAP[row_selected][col_selected]
-                text["play"] += "Please blink once to confirm"
+            elif curr_state == CV.GOT_COL:
+                text["play"] = greeting + ", you have selected " + \
+                    REQUEST_MAP[row_selected][col_selected] + ".\n"
+                text["play"] += "Please blink once to confirm.\n"
             
-            elif curr_state == "ALERT":
+            elif curr_state == CV.ALERT:
                 if row_selected == 1:
                     # discomfort does not entail a greeting
-                    text["play"] = confirmation + ". Someone will be here with you shortly!"
-                    text["text"] = "Patient requires " + REQUEST_MAP[row_selected][col_selected] + ". Please reach out to them."
+                    text["play"] = confirmation + " Someone will be here with you shortly!"
+                    text["text"] = "Patient requires " + REQUEST_MAP[row_selected][col_selected] + ". Please reach out to them.\n"
                 else:
                     text["play"] = "Sorry to know that, someone will be here shortly to attend to you."
-                    text["text"] = "The patient is experiencing " + REQUEST_MAP[row_selected][col_selected] + ". Please reach out to them."
+                    text["text"] = "The patient is experiencing " + REQUEST_MAP[row_selected][col_selected] + ". Please reach out to them.\n"
                 
                 # here, the alert is sent and we need to reset our models
                 cv_model.reset_model()
             else:
                 
                 # patient in state of emergency
-                text["play"] = "Please stay calm. Help is on the way."
-                text["text"] = "Patient requires immediate attention. Please hurry."
+                text["play"] = "Please stay calm. Help is on the way.\n"
+                text["text"] = "Patient requires immediate attention. Please hurry.\n"
                 
                 # means we send 3-4 messages to the person themselves
                 em_state = True 
@@ -169,13 +174,13 @@ class ActionHandler:
         curr_state = vital_model.state 
         print("Current state of model :", curr_state)
 
-        if curr_state == "NORMAL":
+        if curr_state == Vitals.NORMAL:
             # do not send the data 
             pass 
         else:
             text = ""
             em_state = False 
-            if curr_state == "ATTENTION":
+            if curr_state == Vitals.ALERT:
                 # need to send the text 
                 text = f"""Patient requires attention.
                             Heart Rate - {patient.heart_rate} bpm 
@@ -192,16 +197,26 @@ class ActionHandler:
             send_alerts(text, self.email, em_state)
         
         vital_model.reset_model()
-        
+
     def play_sound(self, text):
 
         print(text)
-        # sound_fp = "../data/sound.mp3"
-        # tts = gTTS(text, lang = 'en')
+        randf = int((random.random()*2600)%2101)
+        sound_fp = rf"C:\Users\aryam\NayanCom\python_model\data\{str(randf)}.mp3"
+        open(sound_fp,'w').close()
+        tts = gTTS(text, lang = 'en')
+
+        #save and play
+        tts.save(sound_fp)
+        audio = MP3(sound_fp)
+        t = audio.info.length
+        pygame.mixer.init()
+        pygame.mixer.music.load(sound_fp)
+        pygame.mixer.music.play()
         
-        # save and play
-        # tts.save(sound_fp)
-        # system("mpg123 " + sound_fp)
+        time.sleep(t)
+        pygame.quit()
+        os.remove(sound_fp)
         
         
         

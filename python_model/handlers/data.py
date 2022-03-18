@@ -36,33 +36,36 @@ class CVDataHandler:
         # is called which acts upon this state 
         # if idle, every option is reset 
         
-        self.prev_state = curr_state
         
         # update the state of the model 
         
         if idle:
             self.curr_state = CV.IDLE
             self.row = None 
-            self.col = None 
-        
-        elif blinks >=2 and blinks <= 4:
-            self.curr_state = CV.ACTIVATE
+            self.col = None
+
+            if self.prev_state != CV.IDLE:
+                self.curr_state = CV.ACTIVATE
         
         elif blinks >= 5:
             self.curr_state = CV.EM
-            self.row = self.col = None 
-           
-        elif curr_state == CV.IDLE:
+            self.row = self.col = None
+
+        elif self.curr_state == CV.IDLE:
+            if blinks <= 4 and blinks >= 2:
+                self.curr_state = CV.ACTIVATE
+    
+        elif curr_state == CV.ACTIVATE:
             if blinks <= 3:
                 self.curr_state = CV.GOT_ROW
-                self.row = blinks 
+                self.row = blinks
             else:
                 # what ?
                 # go to activate if the blinks are not constrained
                 self.curr_state = CV.ACTIVATE
-                    
+          
         elif curr_state == CV.GOT_ROW:
-            if blinks == 1:
+            if blinks >= 1:
                 self.curr_state = CV.CONFIRM_ROW
                 
         elif curr_state == CV.CONFIRM_ROW:
@@ -75,11 +78,13 @@ class CVDataHandler:
                 self.curr_state = CV.CONFIRM_ROW
             
         elif curr_state == CV.GOT_COL:
-            if blinks == 1:
+            if blinks >= 1:
                 self.curr_state = CV.ALERT
-                
+            
         # don't need to handle the last states as the ActionHandler 
         # will reset the model 
+
+        self.prev_state = curr_state
         
     
 # after this, action handler is used      

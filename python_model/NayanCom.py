@@ -57,10 +57,10 @@ def get_frame_ear(shape):
 
     # compute the convex hull for the left and right eye, then
     # visualize each of the eyes
-    leftEyeHull = cv2.convexHull(leftEye)
-    rightEyeHull = cv2.convexHull(rightEye)
-    cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
-    cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
+    # leftEyeHull = cv2.convexHull(leftEye)
+    # rightEyeHull = cv2.convexHull(rightEye)
+    # cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
+    # cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
 
     return ear 
 
@@ -73,8 +73,8 @@ caretaker = Caretaker()
 total_blinks = 0
 counter = 0 
 
-right_threshold = 150 
-right_limit = 450
+right_threshold = 120 
+right_limit = 300
 
 frame_count = 0
 
@@ -83,9 +83,9 @@ cv_args = get_cv_args()
 (rStart, rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
 
 EYE_AR_THRESH = 0.25
-EYE_AR_CONSEC_FRAMES = [20, 45]
+EYE_AR_CONSEC_FRAMES = [10, 25]
 
-
+text_config = [(10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2]
 
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor(cv_args['shape_predictor'])
@@ -149,14 +149,11 @@ while True:
         # when the allotted time has passed, then only we have to 
         # register those number of blinks 
 
-        # also, we have to update thhe number of blinks to 0 
+        # also, we have to update the number of blinks to 0 
         # udpate the counter of the time 
 
 	    # loop over the face detections
         for rect in rects:
-            # determine the facial landmarks for the face region, then
-            # convert the facial landmark (x, y)-coordinates to a NumPy
-            # array
             shape = face_utils.shape_to_np(predictor(gray, rect))
 
             ear = get_frame_ear(shape)
@@ -164,19 +161,27 @@ while True:
             if ear < EYE_AR_THRESH:
                 counter += 1
             else:
-                # if the eyes were closed for a sufficient number of
-                # then increment the total number of blinks
                 if counter >= EYE_AR_CONSEC_FRAMES[0] and counter <= EYE_AR_CONSEC_FRAMES[1]:
                     total_blinks += 1
-                    right_threshold = min(right_threshold + 40, right_limit) 
+                    right_threshold = min(right_threshold + 25, right_limit) 
                 # reset the eye frame counter
                 counter = 0
-
+        
+        #cv2.putText(frame, "Blinks: {}".format(total_blinks),text_config[0],text_config[1],text_config[2],text_config[3],text_config[4])
+        #cv2.putText(frame, "EAR: {:.2f}".format(
+        #     ear), (300, 30), text_config[1],text_config[2],text_config[3],text_config[4])
+        #cv2.putText(frame, "FC: {}".format(frame_count),
+        #            (150,30), text_config[1], text_config[2], text_config[3], text_config[4])
+        #cv2.imshow("Frame", frame)
+        key = cv2.waitKey(1) & 0xFF
+        # if the `q` key was pressed, break from the loop
+        if key == ord("q"):
+            break
         if frame_count > right_threshold:
 
             cv_data = {
                 "in_view" : True, 
-                "idle": total_blinks > 0, 
+                "idle": total_blinks == 0, 
                 "num_blinks" : total_blinks
             }
 
@@ -184,25 +189,15 @@ while True:
 
             cv_data_model.receive_data(patient, data = cv_data)
 
-            cv2.putText(frame, "Blinks: {}".format(total_blinks), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-            cv2.putText(frame, "EAR: {:.2f}".format(
-                ear), (300, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-
             # reset the slot of the model detection 
 
             counter = 0
             frame_count = 0 
             total_blinks = 0 
-            right_threshold = 150 
+            right_threshold = 120 
 
             patient.blink_registered = True 
-
-            cv2.imshow("Frame", frame)
-            key = cv2.waitKey(1) & 0xFF
-
-            # if the `q` key was pressed, break from the loop
-            if key == ord("q"):
-                break
+    
     except:
         patient.in_view = False 
         
