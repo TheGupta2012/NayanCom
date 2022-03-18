@@ -1,6 +1,1 @@
-{"patient": 
-    {   
-        "in_view": false, 
-        "vitals_detected": false
-    }
-}
+{"patient": {"in_view": true, "vitals_detected": false}}

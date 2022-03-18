@@ -6,6 +6,7 @@ class Patient:
 
         # vitals
         self.vitals_detected = False 
+        self.blink_registered = False 
         self.heart_rate = None 
         self.o2_level = None 
         
@@ -24,14 +25,14 @@ class Caretaker:
         
         # no locks required as this is done only after the model is 
         # initiated by the website
-        with open("../data/contact_details.json") as file:
-            data = load(file)
+        # with open("../data/contact_details.json") as file:
+        #     data = load(file)
         
-        email = data["contact"]["email"]
-        phone = data["contact"]["phone"]
+        email = "harshit.11235@gmail.com"
+        phone = "7289947376"
         
         # this is not sure...
-        em_service = data["contact"]["em_service"]
+        em_service = "abc@gmail.com"
         
         return (email, phone, em_service)
         

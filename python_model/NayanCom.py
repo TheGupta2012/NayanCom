@@ -1,17 +1,68 @@
+from asyncio import subprocess
 from .handlers.action import ActionHandler 
 from .handlers.data import CVDataHandler, VitalDataHandler 
 
 # # get the actors
 from .models.actors import Patient, Caretaker 
-from .models.open_cv import get_args , get_cv_data 
-# # get the serial module
-import serial
+
+# # # get the serial module
+# import serial
 
 # cv modules
+from scipy.spatial import distance as dist
 import dlib
+from imutils import face_utils
+import cv2 
 from imutils.video import VideoStream
 import imutils
+import os 
+import argparse
 
+def get_cv_args():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('-p', '--shape-predictor', required=True,
+                    help='path to facial landmark predictor')
+    ap.add_argument('-v', '--video', type=str, default="",
+                    help='path to input video file')
+    args = vars(ap.parse_args())
+    return args
+
+def eye_aspect_ratio(eye):
+    	# compute the euclidean distances between the two sets of
+	# vertical eye landmarks (x, y)-coordinates
+	A = dist.euclidean(eye[1], eye[5])
+	B = dist.euclidean(eye[2], eye[4])
+
+	# compute the euclidean distance between the horizontal
+	# eye landmark (x, y)-coordinates
+	C = dist.euclidean(eye[0], eye[3])
+
+	# compute the eye aspect ratio
+	ear = (A + B) / (2.0 * C)
+
+	# return the eye aspect ratio
+	return ear
+
+def get_frame_ear(shape):
+    
+    # extract the left and right eye coordinates, then use the
+    # coordinates to compute the eye aspect ratio for both eyes
+    leftEye = shape[lStart:lEnd]
+    rightEye = shape[rStart:rEnd]
+    leftEAR = eye_aspect_ratio(leftEye)
+    rightEAR = eye_aspect_ratio(rightEye)
+
+    # average the eye aspect ratio together for both eyes
+    ear = (leftEAR + rightEAR) / 2.0
+
+    # compute the convex hull for the left and right eye, then
+    # visualize each of the eyes
+    # leftEyeHull = cv2.convexHull(leftEye)
+    # rightEyeHull = cv2.convexHull(rightEye)
+    # cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
+    # cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
+
+    return ear 
 
 
 # # generate the actors 
@@ -19,34 +70,34 @@ patient = Patient()
 caretaker = Caretaker()
 
 # # start the data recording 
-cv_model = None # TO DO - by aryaman, CV_Model()
-cv_args = get_args()
+total_blinks = 0
+counter = 0 
 
-# cv data 
-face_detector = dlib.get_frontal_face_detector()
-predictor = dlib.shape_predictor(args['shape_predictor'])
+right_threshold = 120 
+right_limit = 300
 
-COUNTER = 0
-TOTAL = 0
-
-RETURN_THRESH = {
-                    "MIN" : 150,
-                    "MAX" : 360
-                }
-
-
-(lStart, lEnd) = imutils.face_utils.FACIAL_LANDMARKS_IDXS['left_eye']
-(rStart, rEnd) = imutils.face_utils.FACIAL_LANDMARKS_IDXS['right_eye']
-
-RET_TIME = RETURN_THRESH.MIN
 frame_count = 0
-# cv data
 
+cv_args = get_cv_args()
+(lStart, lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
+(rStart, rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
+
+EYE_AR_THRESH = 0.25
+EYE_AR_CONSEC_FRAMES = [10, 25]
+
+text_config = [(10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2]
+
+detector = dlib.get_frontal_face_detector()
+predictor = dlib.shape_predictor(cv_args['shape_predictor'])
+
+
+# data
 
 cv_data_model = CVDataHandler()
 vital_data_model = VitalDataHandler()
 
-action_model = ActionHandler()
+# action
+action_model = ActionHandler(caretaker)
 
 
 # 1. connect using the bluetooth manager 
@@ -57,47 +108,105 @@ action_model = ActionHandler()
 # 3. after that access from python, that's it
 
 # first, it will detect the vitals 
+# cv_model_command = ''
+# os.system(cv_model_command)
+# serialPort = serial.Serial(port = '/dev/rfcomm1', baudrate = 9600, timeout = 2)
 
-
-serialPort = serial.Serial(port = '/dev/rfcomm1', baudrate = 9600, timeout = 2)
-
+vs = VideoStream(src=0).start()
 while True:
     # Try to read the data from the serial port
-    try:
-        # we will send data like 
+    # try:
+    #     # we will send data like 
         
-        """ "BPM,O2_LEVEL" """
-        sensor_data = serialPort.readline()
-        vitals = sensor_data.decode('utf-8').split(",")
+    #     """ "BPM,O2_LEVEL" 
+    #     sensor_data = serialPort.readline()
+    #     vitals = sensor_data.decode('utf-8').split(",")
         
-        # Since we will send data in a specific format
-        # the following code works
-        vital_data = {"has_vitals" : True, 
-                      "heart_rate" : int(sensor_data[0]),
-                      "o2_level" : int(sensor_data[1])}
-        vital_data_model.receive_data(patient, data = vital_data)
+    #     # Since we will send data in a specific format
+    #     # the following code works """
+    #     vital_data = {"has_vitals" : True, 
+    #                   "heart_rate" : 0, #int(sensor_data[0]),
+    #                   "o2_level" : 0 }#int(sensor_data[1])}
+    #     vital_data_model.receive_data(patient, data = vital_data)
         
-    except:
-        patient.vitals_detected = False 
+    # except:
+    #     patient.vitals_detected = False 
         
     try:
         frame = vs.read()
         frame = imutils.resize(frame, width=450)
         frame_count += 1
+
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        rects = detector(gray, 0)
+
+        if len(rects) == 0:
+            # no face 
+            patient.in_view = False 
         
-        # we need to have data here for the detection of the number of blinks 
-        # of the patient 
         
+        # when the allotted time has passed, then only we have to 
+        # register those number of blinks 
+
+        # also, we have to update the number of blinks to 0 
+        # udpate the counter of the time 
+
+	    # loop over the face detections
+        for rect in rects:
+            shape = face_utils.shape_to_np(predictor(gray, rect))
+
+            ear = get_frame_ear(shape)
+
+            if ear < EYE_AR_THRESH:
+                counter += 1
+            else:
+                if counter >= EYE_AR_CONSEC_FRAMES[0] and counter <= EYE_AR_CONSEC_FRAMES[1]:
+                    total_blinks += 1
+                    right_threshold = min(right_threshold + 25, right_limit) 
+                # reset the eye frame counter
+                counter = 0
         
-        # this is only called after the 
-        cv_data = get_cv_data(frame, frame_count, RET_TIME) # TO DO:  recieve data from aryaman's model 
-        cv_data_model.receive_data(patient, data= cv_data)
+        #cv2.putText(frame, "Blinks: {}".format(total_blinks),text_config[0],text_config[1],text_config[2],text_config[3],text_config[4])
+        #cv2.putText(frame, "EAR: {:.2f}".format(
+        #     ear), (300, 30), text_config[1],text_config[2],text_config[3],text_config[4])
+        #cv2.putText(frame, "FC: {}".format(frame_count),
+        #            (150,30), text_config[1], text_config[2], text_config[3], text_config[4])
+        #cv2.imshow("Frame", frame)
+        key = cv2.waitKey(1) & 0xFF
+        # if the `q` key was pressed, break from the loop
+        if key == ord("q"):
+            break
+        if frame_count > right_threshold:
+
+            cv_data = {
+                "in_view" : True, 
+                "idle": total_blinks == 0, 
+                "num_blinks" : total_blinks
+            }
+
+            # cv_data = get_cv_data(frame, frame_count, RET_TIME) # TO DO:  recieve data from aryaman's model 
+
+            cv_data_model.receive_data(patient, data = cv_data)
+
+            # reset the slot of the model detection 
+
+            counter = 0
+            frame_count = 0 
+            total_blinks = 0 
+            right_threshold = 120 
+
+            patient.blink_registered = True 
+    
     except:
         patient.in_view = False 
         
     
-    if patient.detected:
+    # if patient.vitals_detected:
+    #     action_model.handle_vitals(patient, vital_data_model)
+
+    if patient.blink_registered :
         action_model.handle_blinks(cv_data_model)
-        action_model.handle_vitals(patient, vital_data_model)
-        
+        patient.blink_registered = False 
+         
     action_model.update_model_vars(patient)
