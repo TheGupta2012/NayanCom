@@ -1,6 +1,0 @@
-scipy
-imutils
-numpy
-opencv-python
-cmake
-dlib       #needs Visual C++ tools before installation

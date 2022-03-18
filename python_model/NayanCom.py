@@ -1,98 +1,32 @@
-from asyncio import subprocess
+# get handlers
 from .handlers.action import ActionHandler 
 from .handlers.data import CVDataHandler, VitalDataHandler 
 
-# # get the actors
+# get actors
 from .models.actors import Patient, Caretaker 
+from .models.open_cv import EYE_AR_CONSEC_FRAMES, EYE_AR_THRESH, TEXT_CONFIG, EarModel, get_cv_args, get_frame_ear
 
-# # # get the serial module
-# import serial
+# for vitals
+import serial
 
 # cv modules
-from scipy.spatial import distance as dist
 import dlib
 from imutils import face_utils
 import cv2 
 from imutils.video import VideoStream
 import imutils
-import os 
-import argparse
 
-def get_cv_args():
-    ap = argparse.ArgumentParser()
-    ap.add_argument('-p', '--shape-predictor', required=True,
-                    help='path to facial landmark predictor')
-    ap.add_argument('-v', '--video', type=str, default="",
-                    help='path to input video file')
-    args = vars(ap.parse_args())
-    return args
-
-def eye_aspect_ratio(eye):
-    	# compute the euclidean distances between the two sets of
-	# vertical eye landmarks (x, y)-coordinates
-	A = dist.euclidean(eye[1], eye[5])
-	B = dist.euclidean(eye[2], eye[4])
-
-	# compute the euclidean distance between the horizontal
-	# eye landmark (x, y)-coordinates
-	C = dist.euclidean(eye[0], eye[3])
-
-	# compute the eye aspect ratio
-	ear = (A + B) / (2.0 * C)
-
-	# return the eye aspect ratio
-	return ear
-
-def get_frame_ear(shape):
-    
-    # extract the left and right eye coordinates, then use the
-    # coordinates to compute the eye aspect ratio for both eyes
-    leftEye = shape[lStart:lEnd]
-    rightEye = shape[rStart:rEnd]
-    leftEAR = eye_aspect_ratio(leftEye)
-    rightEAR = eye_aspect_ratio(rightEye)
-
-    # average the eye aspect ratio together for both eyes
-    ear = (leftEAR + rightEAR) / 2.0
-
-    # compute the convex hull for the left and right eye, then
-    # visualize each of the eyes
-    # leftEyeHull = cv2.convexHull(leftEye)
-    # rightEyeHull = cv2.convexHull(rightEye)
-    # cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
-    # cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
-
-    return ear 
-
-
-# # generate the actors 
+# generate the actors 
 patient = Patient()
 caretaker = Caretaker()
 
-# # start the data recording 
-total_blinks = 0
-counter = 0 
-
-right_threshold = 120 
-right_limit = 300
-
-frame_count = 0
-
+# define models and args
 cv_args = get_cv_args()
-(lStart, lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
-(rStart, rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
-
-EYE_AR_THRESH = 0.25
-EYE_AR_CONSEC_FRAMES = [10, 25]
-
-text_config = [(10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2]
-
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor(cv_args['shape_predictor'])
 
-
 # data
-
+ear_model = EarModel()
 cv_data_model = CVDataHandler()
 vital_data_model = VitalDataHandler()
 
@@ -108,11 +42,11 @@ action_model = ActionHandler(caretaker)
 # 3. after that access from python, that's it
 
 # first, it will detect the vitals 
-# cv_model_command = ''
-# os.system(cv_model_command)
+
 # serialPort = serial.Serial(port = '/dev/rfcomm1', baudrate = 9600, timeout = 2)
 
 vs = VideoStream(src=0).start()
+
 while True:
     # Try to read the data from the serial port
     # try:
@@ -135,7 +69,7 @@ while True:
     try:
         frame = vs.read()
         frame = imutils.resize(frame, width=450)
-        frame_count += 1
+        ear_model.frame_count += 1
 
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
@@ -145,67 +79,62 @@ while True:
             # no face 
             patient.in_view = False 
         
-        
         # when the allotted time has passed, then only we have to 
         # register those number of blinks 
 
         # also, we have to update the number of blinks to 0 
-        # udpate the counter of the time 
+        # update the ear_model.counter of the time 
 
-	    # loop over the face detections
         for rect in rects:
             shape = face_utils.shape_to_np(predictor(gray, rect))
 
             ear = get_frame_ear(shape)
 
             if ear < EYE_AR_THRESH:
-                counter += 1
+                ear_model.counter += 1
             else:
-                if counter >= EYE_AR_CONSEC_FRAMES[0] and counter <= EYE_AR_CONSEC_FRAMES[1]:
-                    total_blinks += 1
-                    right_threshold = min(right_threshold + 25, right_limit) 
+                if ear_model.counter >= EYE_AR_CONSEC_FRAMES[0] and ear_model.counter <= EYE_AR_CONSEC_FRAMES[1]:
+                    ear_model.total_blinks += 1
+                    ear_model.right_threshold = min(ear_model.right_threshold + 25, ear_model.right_limit) 
+                
                 # reset the eye frame counter
-                counter = 0
+                ear_model.counter = 0
         
-        #cv2.putText(frame, "Blinks: {}".format(total_blinks),text_config[0],text_config[1],text_config[2],text_config[3],text_config[4])
-        #cv2.putText(frame, "EAR: {:.2f}".format(
-        #     ear), (300, 30), text_config[1],text_config[2],text_config[3],text_config[4])
-        #cv2.putText(frame, "FC: {}".format(frame_count),
-        #            (150,30), text_config[1], text_config[2], text_config[3], text_config[4])
-        #cv2.imshow("Frame", frame)
+        cv2.putText(frame, "Blinks: {}".format(ear_model.total_blinks),TEXT_CONFIG[0],TEXT_CONFIG[1],TEXT_CONFIG[2],TEXT_CONFIG[3],TEXT_CONFIG[4])
+        cv2.putText(frame, "EAR: {:.2f}".format(
+            ear), (300, 30), TEXT_CONFIG[1],TEXT_CONFIG[2],TEXT_CONFIG[3],TEXT_CONFIG[4])
+        cv2.putText(frame, "FC: {}".format(ear_model.frame_count),
+                   (150,30), TEXT_CONFIG[1], TEXT_CONFIG[2], TEXT_CONFIG[3], TEXT_CONFIG[4])
+        cv2.imshow("Frame", frame)
+        
+        
         key = cv2.waitKey(1) & 0xFF
+        
         # if the `q` key was pressed, break from the loop
         if key == ord("q"):
             break
-        if frame_count > right_threshold:
-
+        
+        # if we have exhausted the time limit
+        if ear_model.frame_count > ear_model.right_threshold:
+            
+            # TRY TO REGISTER THE NUMBER OF BLINKS
             cv_data = {
                 "in_view" : True, 
-                "idle": total_blinks == 0, 
-                "num_blinks" : total_blinks
+                "idle": (ear_model.total_blinks == 0), 
+                "num_blinks" : ear_model.total_blinks
             }
-
-            # cv_data = get_cv_data(frame, frame_count, RET_TIME) # TO DO:  recieve data from aryaman's model 
-
             cv_data_model.receive_data(patient, data = cv_data)
-
-            # reset the slot of the model detection 
-
-            counter = 0
-            frame_count = 0 
-            total_blinks = 0 
-            right_threshold = 120 
-
+            
+            ear_model.reset_data()
             patient.blink_registered = True 
     
     except:
         patient.in_view = False 
         
-    
     # if patient.vitals_detected:
     #     action_model.handle_vitals(patient, vital_data_model)
 
-    if patient.blink_registered :
+    if patient.blink_registered:
         action_model.handle_blinks(cv_data_model)
         patient.blink_registered = False 
          

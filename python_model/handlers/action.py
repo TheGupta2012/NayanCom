@@ -32,16 +32,17 @@ from ..models.mappers import VitalLevels, CV, Vitals
 from .alert import send_alerts
 
 # for locking
-# from fasteners import InterProcessLock # platform agnostic
+from fasteners import InterProcessLock # platform agnostic
 from json import dump  
 
-#for tts 
+#for text to speech 
 from gtts import gTTS
 import random 
 import os
 import pygame
 import time
 from mutagen.mp3 import MP3
+
 class ActionHandler:
     
     greets = ["Hey there", "Hi", "Hey", "Hi there"]
@@ -65,29 +66,27 @@ class ActionHandler:
         
         # here, we need to lock the file 
         # model_vars.json and then update it 
-        
-        # lock = InterProcessLock("../data/model_vars.json")   
-        # acquired = lock.acquire()
+        lock = InterProcessLock("../data/model_vars.json")   
+        acquired = lock.acquire()
     
-        # # site may be reading the file
-        # while not acquired:
-        #     acquired = lock.acquire(timeout=2)
+        # site may be reading the file
+        while not acquired:
+            acquired = lock.acquire(timeout=1)
         
-        # try:
-        #     # update the data 
-        #     
-        data = {    "patient":
-                    {
-                    "in_view" : patient.in_view, 
-                    "vitals_detected" : patient.vitals_detected
+        try:
+            # update the data 
+            data = {    "patient":
+                            {
+                            "in_view" : patient.in_view, 
+                            "vitals_detected" : patient.vitals_detected
+                            }
                     }
-                }
-        file = open(r"C:\Users\aryam\NayanCom\python_model\data\patient_detected.json", "w")
-        dump(data, file)
-        file.close()    
+            file = open(r"../data/patient_detected.json", "w")
+            dump(data, file)
+            file.close()    
             
-        # finally:
-        #     lock.release()
+        finally:
+            lock.release()
         
     
     def handle_blinks(self, cv_model):
@@ -158,12 +157,14 @@ class ActionHandler:
                 em_state = True 
                 
                 cv_model.reset_model()
-            
-        if len(text["text"]) > 0:
-            send_alerts(text["text"], self.email, em_state)
         
         # say the confirmation sounds 
         self.play_sound(text["play"])
+        
+        if len(text["text"]) > 0:
+            send_alerts(text["text"], self.email, em_state)
+        
+       
         
     
     def handle_vitals(self, patient, vital_model):
@@ -201,8 +202,8 @@ class ActionHandler:
     def play_sound(self, text):
 
         print(text)
-        randf = int((random.random()*2600)%2101)
-        sound_fp = rf"C:\Users\aryam\NayanCom\python_model\data\{str(randf)}.mp3"
+        randf = str(int((random.random()*2600)%2101))
+        sound_fp = rf"python_model/data/sounds/{randf}.mp3"
         open(sound_fp,'w').close()
         tts = gTTS(text, lang = 'en')
 
@@ -210,12 +211,14 @@ class ActionHandler:
         tts.save(sound_fp)
         audio = MP3(sound_fp)
         t = audio.info.length
+        
         pygame.mixer.init()
         pygame.mixer.music.load(sound_fp)
         pygame.mixer.music.play()
         
         time.sleep(t)
         pygame.quit()
+        
         os.remove(sound_fp)
         
         

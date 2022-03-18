@@ -2,9 +2,9 @@
 from enum import Enum
 
 REQUEST_MAP = {
-    1 : {1 : "WATER", 2 : "FOOD", 3 : "WASHROOM"}, 
-    2 : {1 : "BODYACHE", 2 : "COLD AND COUGH", 3 : "HEADACHE"},
-    3 : {1 : "LIMB PAIN", 2 : "FATIGUE", 3 : "CHEST PAIN"}
+    1 : {1 : "water", 2 : "food", 3 : "lights"}, 
+    2 : {1 : "bodyache", 2 : "cold and cough", 3 : "head ache"},
+    3 : {1 : "limb pain", 2 : "fatigue", 3 : "chest pain"}
 }
 
 class CV(Enum):

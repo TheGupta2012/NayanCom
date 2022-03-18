@@ -1,110 +1,84 @@
-from scipy.spatial import distance as dist
-import time
+import math 
 import argparse
-import cv2
+from imutils import face_utils
+import cv2 
 
+(lStart, lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
+(rStart, rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
+
+EYE_AR_THRESH = 0.25
+EYE_AR_CONSEC_FRAMES = [10, 25]
+
+# for drawing
+TEXT_CONFIG = [(10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2]
+
+# define data for the running of model
+class EarModel:
+    def __init__(self) -> None:
+        self.total_blinks = 0 
+        self.counter = 0
+        self.right_threshold = 120
+        self.right_limit = 300
+        self.frame_count =  0
+    
+    def reset_data(self):
+        self.counter = 0
+        self.frame_count = 0 
+        self.total_blinks = 0 
+        self.right_threshold = 120
+
+
+# utilities
+def euclidean(p1, p2):
+    x1, y1 = p1[0] , p1[1]
+    x2, y2 = p2[0] , p2[1]
+    
+    distance = math.sqrt((x2-x1)**2 + (y2-y1)**2)
+    return distance
 
 def eye_aspect_ratio(eye):
-    A = dist.euclidean(eye[1], eye[5])
-    B = dist.euclidean(eye[2], eye[4])
+    	# compute the euclidean distances between the two sets of
+	# vertical eye landmarks (x, y)-coordinates
+	A = euclidean(eye[1], eye[5])
+	B = euclidean(eye[2], eye[4])
 
-    C = dist.euclidean(eye[0], eye[3])
+	# compute the euclidean distance between the horizontal
+	# eye landmark (x, y)-coordinates
+	C = euclidean(eye[0], eye[3])
 
-    ear = (A + B) / (2.0 * C)
-    return ear
+	# compute the eye aspect ratio
+	ear = (A + B) / (2.0 * C)
 
-def get_args():
+	# return the eye aspect ratio
+	return ear
+
+def get_cv_args():
     ap = argparse.ArgumentParser()
-    ap.add_argument('-p', '--shape-predictor', required=True, help='path to facial landmark predictor')
-    ap.add_argument('-v', '--video', type=str, default="", help='path to input video file')
+    ap.add_argument('-p', '--shape-predictor', required=True,
+                    help='path to facial landmark predictor')
+    ap.add_argument('-v', '--video', type=str, default="",
+                    help='path to input video file')
     args = vars(ap.parse_args())
+    return args
+
+def get_frame_ear(shape):
     
-    return args 
+    # extract the left and right eye coordinates, then use the
+    # coordinates to compute the eye aspect ratio for both eyes
+    leftEye = shape[lStart:lEnd]
+    rightEye = shape[rStart:rEnd]
+    leftEAR = eye_aspect_ratio(leftEye)
+    rightEAR = eye_aspect_ratio(rightEye)
 
-EYE_AR_THRESH = 0.3
-EYE_AR_CONSEC_FRAMES = [15, 45]
+    # average the eye aspect ratio together for both eyes
+    ear = (leftEAR + rightEAR) / 2.0
 
-
-
-
-# print('[INFO] Loading facial landmark predictor...')
-
-print('[INFO] Starting video stream thread...')
-
-vs = VideoStream(src=0).start()
-# vs = VideoStream(usePiCamera=True).start()
-time.sleep(1.0)
-
-RETURN_THRESH = {
-                    "MIN" : 150,
-                    "MAX" : 360
-                }
-
-def get_cv_data(frame, frame_count, RET_TIME):
-    data = {
-        "in_view" : False, 
-        "idle" : False, 
-        "num_blinks" : 0
-    }
+    # compute the convex hull for the left and right eye, then
+    # visualize each of the eyes
     
-    try:
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        rects = face_detector(gray, 0)
-        data['in_view'] = True 
-    except:
-        # face is not detected here 
-        #cv2.putText(frame, "FACE NOT DETECTED FOOL", (100, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-        return data 
-    
-    if frame_count >= RET_TIME:
-        #IDLE STATE
-        data["idle"] = True
-    else:            
+    # leftEyeHull = cv2.convexHull(leftEye)
+    # rightEyeHull = cv2.convexHull(rightEye)
+    # cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
+    # cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
 
-        for rect in rects:
-            shape = predictor(gray, rect)
-            shape = imutils.face_utils.shape_to_np(shape)
-
-            leftEye = shape[lStart: lEnd]
-            rightEye = shape[rStart: rEnd]
-            leftEAR = eye_aspect_ratio(leftEye)
-            rightEAR = eye_aspect_ratio(rightEye)
-
-            ear = (leftEAR + rightEAR) / 2.0
-
-            leftEyeHull = cv2.convexHull(leftEye)
-            rightEyeHull = cv2.convexHull(rightEye)
-            cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
-            cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
-
-            """To enhance"""
-            if ear < EYE_AR_THRESH:
-                COUNTER += 1
-            else:
-                if COUNTER >= EYE_AR_CONSEC_FRAMES[0] and COUNTER <= EYE_AR_CONSEC_FRAMES[1]:
-                    TOTAL += 1
-                    if (RET_TIME + 60 <=RETURN_THRESH.MAX):
-                        RET_TIME += 60
-                    else:
-                        RET_TIME = RETURN_THRESH.MAX 
-                    frame_count = 0
-            
-                COUNTER = 0
-            """To enhance"""
-        data["num_blinks"] = TOTAL 
-        
-        # cv2.putText(frame, "Blinks: {}".format(TOTAL), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-        # cv2.putText(frame, "EAR: {:.2f}".format(ear), (300, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-        # cv2.putText(frame, "FC: {:.2f}".format(frame_count), (150, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-    return data 
-
-
-    # cv2.imshow("Frame", frame)
-    key = cv2.waitKey(1) & 0xFF
-
-    if key == ord("q"):
-        break
-
-
-cv2.destroyAllWindows()
-vs.stop()
+    return ear 
