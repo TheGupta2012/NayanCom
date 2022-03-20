@@ -4,17 +4,18 @@ from .handlers.data import CVDataHandler, VitalDataHandler
 
 # get actors
 from .models.actors import Patient, Caretaker 
-from .models.open_cv import EYE_AR_CONSEC_FRAMES, EYE_AR_THRESH, TEXT_CONFIG, EarModel, get_cv_args, get_frame_ear
 
 # for vitals
 import serial
 
-# cv modules
+# cv modules and data
 import dlib
 from imutils import face_utils
 import cv2 
-from imutils.video import VideoStream
 import imutils
+from imutils.video import VideoStream
+from .models.open_cv import EYE_AR_CONSEC_FRAMES, EYE_AR_THRESH, TEXT_CONFIG, EarModel, get_cv_args, get_frame_ear
+
 
 # generate the actors 
 patient = Patient()
@@ -44,7 +45,6 @@ action_model = ActionHandler(caretaker)
 # first, it will detect the vitals 
 
 # serialPort = serial.Serial(port = '/dev/rfcomm1', baudrate = 9600, timeout = 2)
-
 vs = VideoStream(src=0).start()
 
 while True:
