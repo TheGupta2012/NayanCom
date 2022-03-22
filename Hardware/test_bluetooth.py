@@ -4,7 +4,7 @@ import sys
 import signal
 def signal_handler(signal, frame):
 	print("closing program")
-	SerialPort.close()
+	SerialPort.close() 
 	sys.exit(0)
 
 SerialPort = serial.Serial(port = '/dev/rfcomm1', baudrate = 9600, timeout = 2)
