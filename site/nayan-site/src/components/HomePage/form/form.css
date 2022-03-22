@@ -1,0 +1,11 @@
+.invalid {
+  border: 1px solid red !important;
+}
+input {
+    outline: none !important;
+    box-shadow: none !important;
+}
+textarea {
+  outline: none !important;
+  box-shadow: none !important;
+}
