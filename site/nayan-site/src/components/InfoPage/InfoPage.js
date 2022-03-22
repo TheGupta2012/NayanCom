@@ -45,7 +45,7 @@ function InfoPage() {
         <div className="ihomepage" >
             <Header />
             <div className="iseparator">
-                An IoT project for the terminally ill patients.
+                Patient Monitoring Redefined
             </div>
             <div className="ibutton">
                 <button defaultValue={false} onClick={() => onSubmit()} className="btn btn-primary my-3" value="Submit" >

@@ -11,8 +11,9 @@ function HomePage() {
         <div className="homepage" >
             <Header />
             <div className="separator">
-                An IoT project for the terminally ill patients.
+                Patient Monitoring Redefined
             </div>
+            
             <div className="body" >
                 <div className="leftBody">
                     <Form />

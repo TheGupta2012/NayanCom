@@ -11,11 +11,11 @@
   display: inline-block;
   padding-top: 1.2vh;
   height: 6vh;
-  background-color: #e98456;
+  background-color: #ddd2cd;
   text-align: center;
   font-size: 1rem;
   font-family: "Noto Sans JP", sans-serif;
-  color: white;
+  color: rgb(14, 2, 2);
 }
 
 .body {
@@ -99,18 +99,14 @@
 
 @media (max-width: 1251px) {
   .separator {
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-    backdrop-filter: blur(7.5px);
-    -webkit-backdrop-filter: blur(7.5px);
-    border-radius: 0px;
     display: inline-block;
-    padding-top: 2.4vh;
-    background-image: linear-gradient(to right, #f51e6a, #ff4b2b);
-    height: 3rem;
+    padding-top: 1.2vh;
+    height: 6vh;
+    background-color: #ddd2cd;
     text-align: center;
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-family: "Noto Sans JP", sans-serif;
-    color: white;
+    color: rgb(14, 2, 2);
   }
 
   .body {
@@ -174,18 +170,14 @@
 
 @media (max-width: 870px) {
   .separator {
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-    backdrop-filter: blur(7.5px);
-    -webkit-backdrop-filter: blur(7.5px);
-    border-radius: 0px;
     display: inline-block;
-    padding-top: 2.4vh;
-    background-image: linear-gradient(to right, #f51e6a, #ff4b2b);
-    height: 5vh;
+    padding-top: 1.2vh;
+    height: 6vh;
+    background-color: #ddd2cd;
     text-align: center;
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-family: "Noto Sans JP", sans-serif;
-    color: white;
+    color: rgb(14, 2, 2);
   }
 
   .body {

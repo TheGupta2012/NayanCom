@@ -1,11 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500&display=swap");
 
 .header {
-  background: #8f8f8f;
+  background: #cc6817;
   width: 100%;
-  height: 4rem;
+  height: 8rem;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-evenly;
   padding: 10px 10px 10px 10px;
   box-sizing: border-box;
 }
@@ -27,7 +27,7 @@
 .logo-text {
   font-family: "Noto Sans JP", sans-serif;
   color: #ffffff;
-  font-size: 1.4rem;
+  font-size: 3rem;
   font-weight: 600;
 }
 
@@ -38,11 +38,13 @@
 
 @media (max-width: 870px) {
   .header {
-    height: 5rem;
+    background: #cc6817;
+    width: 100%;
+    height: 8rem;
     display: flex;
-    justify-content: space-between;
-    padding: 8px;
-    padding-bottom: 10px;
+    justify-content: space-evenly;
+    padding: 10px 10px 10px 10px;
+    box-sizing: border-box;
   }
 
   .logo {
@@ -78,15 +80,18 @@
   }
 
   .header img {
-    padding-left: 25px;
-    padding-right: 10px;
-    height: 30px;
-    width: auto;
+    background: #cc6817;
+    width: 100%;
+    height: 8rem;
+    display: flex;
+    justify-content: space-evenly;
+    padding: 10px 10px 10px 10px;
+    box-sizing: border-box;
   }
   .logo-text {
     font-family: "Noto Sans JP", sans-serif;
-    color: #686868;
-    font-size: 1.1rem;
+    color: #ffffff;
+    font-size: 3rem;
     font-weight: 400;
   }
 
