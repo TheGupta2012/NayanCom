@@ -56,9 +56,9 @@ function InfoPage() {
                 </button>
             </div>
             <div className="ibody" >
-                {/* <div className="ileftBody">
+                <div className="ileftBody">
                     {loading ? <></> : data.patient.vitals_detected ? <img src={vital_gif} alt="loading..." /> : <img src={vital_not_gif} alt="loading..." />}
-                </div> */}
+                </div>
                 <div className="irightBody">
                     {loading ? <></> : data.patient.in_view ? <img src={face_gif} alt="loading..." /> : <img src={face_not_gif} alt="loading..." />}
                 </div>

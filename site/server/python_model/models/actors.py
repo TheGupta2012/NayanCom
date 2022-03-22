@@ -3,7 +3,7 @@ from json import load
 class Patient:
     def __init__(self) -> None:
         self.in_view = False
-
+        
         # vitals
         self.vitals_detected = False  
         self.blink_registered = False  
@@ -24,7 +24,7 @@ class Caretaker:
         
         # no locks required as this is done only after the model is 
         # initiated by the website
-        details_path = r"/home/harshit/college/Sem-6/IOT/Project/NayanCom/site/server/output.json"
+        details_path = r"data/contact_details.json"
         with open(details_path) as file:
             data = load(file)
         

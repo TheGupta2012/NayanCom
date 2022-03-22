@@ -78,7 +78,8 @@ class ActionHandler:
                         "vitals_detected" : patient.vitals_detected
                         }
                 }
-        file = open(r"/home/harshit/college/Sem-6/IOT/Project/NayanCom/site/server/vitals_face.json", "w")
+        # this is running in the top level directory 
+        file = open(r"data/vitals_face.json", "w")
         dump(data, file)
         file.close()    
         
@@ -194,7 +195,7 @@ class ActionHandler:
 
         print(text)
         randf = str(int((random.random()*2600)%2101))
-        sound_fp = rf"python_model/data/sounds/{randf}.mp3"
+        sound_fp = rf"data/sounds/{randf}.mp3"
         open(sound_fp,'w').close()
         tts = gTTS(text, lang = 'en')
 
