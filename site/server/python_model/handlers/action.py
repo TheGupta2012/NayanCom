@@ -47,9 +47,6 @@ class ActionHandler:
     
     greets = ["Hey there", "Hi", "Hey", "Hi there"]
     
-    # confirm = ["Are you sure about that?", "Is this what you selected?", "Please confirm once!",
-    #             "Is that it?", "For sure?", "Are you sure?", "Confirm your choice!"]
-    
     confirms = ["Alright!", "Perfect!", "Okay sure!", "Sure!",
                 "Okay!", "Awesome!"]
         
@@ -183,19 +180,14 @@ class ActionHandler:
             if curr_state == Vitals.ALERT:
                 # need to send the text 
                 text = f"""Patient requires attention.
-                            Heart Rate - {patient.heart_rate} bpm 
-                            Oxygen level - {patient.o2_level}%"""
+                            Heart Rate - {patient.heart_rate} bpm """
             else:
                 # need to send and alert the em services 
                 text = f"""Alert! Patient vitals critical""" 
                 if patient.heart_danger:
                     text+= f"\nHeart Rate critical : {patient.heart_rate} bpm"
-                if patient.o2_danger:
-                    text+= f"\nOxygen level critical : {patient.o2_level}%"
                 em_state = True 
-              
             send_alerts(text, self.email, em_state)
-        
         vital_model.reset_model()
 
     def play_sound(self, text):

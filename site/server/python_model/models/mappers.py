@@ -28,9 +28,8 @@ class VitalLevels:
     heart_rates = [
         (0,39,"DANGER-LOW"), # DANGEROUS
         (40,100,"NORMAL"),
-        (101,109,"ATTENTION"),
-        (110,130,"ATTENTION"),
-        (131,180,"DANGER-HIGH") # DANGEROUS
+        (101,130,"ATTENTION"),
+        (131,200,"DANGER-HIGH") # DANGEROUS
     ]
     
     o2_levels = [

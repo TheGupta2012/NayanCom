@@ -30,7 +30,7 @@ class CVDataHandler:
             self._update_states(self.curr_state, blinks, idle)
         
     # based on the CV Blink model on paper
-    
+        
     def _update_states(self, curr_state, blinks, idle):
         # when this is updated, immediately the action handler 
         # is called which acts upon this state 
@@ -105,50 +105,40 @@ class VitalDataHandler:
     def __init__(self) -> None:
         self.state = Vitals.NORMAL
         self.heart_danger = False 
-        self.o2_danger = False
-    
+
     def receive_data(self, patient, data):
         # data is present as : 
             # heart rate : Int
-            # o2 level : Float 
             
         vitals_detected = data["has_vitals"]
         patient.vitals_detected = vitals_detected
         
         if vitals_detected:
             heart_rate = data["heart_rate"]
-            o2_level = data["o2_level"]
             
             curr_state = self.state 
-            
             patient.heart_rate = heart_rate 
-            patient.o2_level = o2_level
-            
-            self._update_state( curr_state, heart_rate, o2_level)
+            self._update_state(curr_state, heart_rate)
         
-    def _update_state(self,curr_state, heart_rate, o2_level):
+    def _update_state(self, heart_rate):
         
         heart_status = VitalLevels.classify_heart_rate(heart_rate)
-        o2_status = VitalLevels.classify_o2_level(o2_level)
+        # o2_status = VitalLevels.classify_o2_level(o2_level)
         
         # if we have idle state 
         
-        if heart_status == "NORMAL" and o2_status == "NORMAL":
+        if heart_status == "NORMAL":
             pass 
         else:
-            if "DANGER" not in heart_status and "DANGER" not in o2_status:
+            if "DANGER" not in heart_status:
                 # text something like 
                 # "Patient requires attention - vitals are : (heart, o2)" 
                 self.state = Vitals.ALERT
             else:
                 # atleast 1 is danger
                 self.state = Vitals.EM               
-                
-                if "DANGER" in heart_status:
-                    self.heart_danger = True 
+                self.heart_danger = True 
                     
-                if "DANGER" in o2_status:
-                    self.o2_danger = True 
            
     def reset_model(self):
         """Tries to reset the state of the model for the 
@@ -157,7 +147,6 @@ class VitalDataHandler:
         # the request to EM services is sent OR 
         self.state = Vitals.NORMAL
         self.heart_danger = False 
-        self.o2_danger = False
         
     
             

@@ -6,7 +6,7 @@ from .handlers.data import CVDataHandler, VitalDataHandler
 from .models.actors import Patient, Caretaker 
 
 # for vitals
-# import serial
+import serial
 
 # cv modules and data
 import dlib
@@ -44,7 +44,7 @@ action_model = ActionHandler(caretaker)
 
 # first, it will detect the vitals 
 
-# serialPort = serial.Serial(port = '/dev/rfcomm1', baudrate = 9600, timeout = 2)
+serialPort = serial.Serial(port = '/dev/rfcomm1', baudrate = 9600, timeout = 2)
 vs = VideoStream(src=0).start()
 
 while True:
@@ -52,15 +52,18 @@ while True:
     try:
         # we will send data like 
         
-        """ "BPM,O2_LEVEL" """
+        """ "BPM " """
+        while serialPort.in_waiting():
+            continue 
+
         sensor_data = serialPort.readline()
-        vitals = sensor_data.decode('utf-8').split(",")
+        vitals = sensor_data.decode('utf-8').split(":")
         
         # Since we will send data in a specific format
-        # the following code works """
+        # the following code works 
         vital_data = {"has_vitals" : True, 
-                      "heart_rate" : 0, #int(sensor_data[0]),
-                      "o2_level" : 0 }#int(sensor_data[1])}
+                      "heart_rate" : int(vitals[-1])}
+                      
         vital_data_model.receive_data(patient, data = vital_data)
         
     except:

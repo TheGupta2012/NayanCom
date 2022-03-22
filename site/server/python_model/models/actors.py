@@ -5,10 +5,9 @@ class Patient:
         self.in_view = False
 
         # vitals
-        self.vitals_detected = False 
-        self.blink_registered = False 
+        self.vitals_detected = False  
+        self.blink_registered = False  
         self.heart_rate = None 
-        self.o2_level = None 
         
     def detected(self, patient):
  
