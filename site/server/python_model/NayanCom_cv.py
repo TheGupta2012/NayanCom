@@ -1,6 +1,6 @@
 # get handlers
 from .handlers.action import ActionHandler
-from .handlers.data import CVDataHandler, VitalDataHandler
+from .handlers.data import CVDataHandler
 
 # get actors
 from .models.actors import Patient, Caretaker
@@ -21,8 +21,6 @@ from .models.open_cv import (
     get_frame_ear,
 )
 
-# generate the actors
-patient = Patient()
 caretaker = Caretaker()
 
 # define models and args
@@ -34,55 +32,15 @@ predictor = dlib.shape_predictor(cv_args["shape_predictor"])
 ear_model = EarModel()
 cv_data_model = CVDataHandler()
 
-# vitals data
-vital_readings = []
-update_vitals = False
-total_readings = 0
-
-vital_data_model = VitalDataHandler()
 
 # action
 action_model = ActionHandler(caretaker)
 
-
 # for vitals
-import serial
-
-serialPort = serial.Serial(port="/dev/rfcomm1", baudrate=9600, timeout=4)
 
 # cv model initial
 vs = VideoStream(src=0).start()
-
 while True:
-    # Try to read the data from the serial port
-    try:
-        sensor_data = serialPort.readline()
-        vitals = sensor_data.decode("utf-8").split(":")
-        heart_rate = max(45, int(vitals[-1]) - 150)  # some calibration error
-        vital_readings.append(heart_rate)
-
-        total_readings += 1
-
-        if len(vital_readings) == 10:
-            vital_data = {
-                "has_vitals": True,
-                "heart_rate": sum(vital_readings) // 10,
-            }
-            print("Avg. Vitals registered :", vital_data)
-
-            vital_readings.clear()
-            patient.vitals_registered = True
-
-            vital_data_model.receive_data(patient, data=vital_data)
-
-            # data handler will update the value of patient vitals detected inside
-            # the model
-            if total_readings >= 20:
-                update_vitals = True
-                total_readings = 0
-
-    except:
-        patient.vitals_detected = False
 
     try:
         frame = vs.read()
@@ -95,7 +53,7 @@ while True:
 
         if len(rects) == 0:
             # no face
-            patient.in_view = False
+            Patient.in_view = False
 
         # when the allotted time has passed, then only we have to
         # register those number of blinks
@@ -123,21 +81,21 @@ while True:
                 # reset the eye frame counter
                 ear_model.counter = 0
 
-        # cv2.putText(
-        #     frame,
-        #     "Blinks: {}".format(ear_model.total_blinks),
-        #     TEXT_CONFIG[0],
-        #     TEXT_CONFIG[1],
-        #     TEXT_CONFIG[2],
-        #     TEXT_CONFIG[3],
-        #     TEXT_CONFIG[4],
-        # )
+        cv2.putText(
+            frame,
+            "Blinks: {}".format(ear_model.total_blinks),
+            TEXT_CONFIG[0],
+            TEXT_CONFIG[1],
+            TEXT_CONFIG[2],
+            TEXT_CONFIG[3],
+            TEXT_CONFIG[4],
+        )
         # cv2.putText(frame, "EAR: {:.2f}".format(
         #     ear), (300, 30), TEXT_CONFIG[1],TEXT_CONFIG[2],TEXT_CONFIG[3],TEXT_CONFIG[4])
         # cv2.putText(frame, "FC: {}".format(ear_model.frame_count),
         #            (150,30), TEXT_CONFIG[1], TEXT_CONFIG[2], TEXT_CONFIG[3], TEXT_CONFIG[4])
 
-        # cv2.imshow("Frame", frame)
+        cv2.imshow("Frame", frame)
         key = cv2.waitKey(1) & 0xFF
 
         # if the `q` key was pressed, break from the loop
@@ -153,20 +111,20 @@ while True:
                 "idle": (ear_model.total_blinks == 0),
                 "num_blinks": ear_model.total_blinks,
             }
-            cv_data_model.receive_data(patient, data=cv_data)
+            cv_data_model.receive_data(Patient, data=cv_data)
 
             ear_model.reset_data()
-            patient.blink_registered = True
+            Patient.blink_registered = True
 
     except:
-        patient.in_view = False
+        Patient.in_view = False
 
-    if patient.vitals_registered:
-        action_model.handle_vitals(patient, vital_data_model, update_vitals)
-        patient.vitals_registered = False
+    # if Patient.vitals_registered:
+    #     action_model.handle_vitals(Patient, vital_data_model, update_vitals)
+    #     Patient.vitals_registered = False
 
-    if patient.blink_registered:
+    if Patient.blink_registered:
         action_model.handle_blinks(cv_data_model)
-        patient.blink_registered = False
+        Patient.blink_registered = False
 
-    action_model.update_model_vars(patient)
+    action_model.update_model_vars(Patient)

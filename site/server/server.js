@@ -17,7 +17,7 @@ const dataVitals = JSON.parse(fs.readFileSync(path.join(__dirname, './data/vital
 
 var python_started = false;
 
-app.get("/", async (req, res) => {
+app.get("/vitals", async (req, res) => {
     // console.log(dirName);
     console.log(dataVitals);
 
@@ -56,4 +56,4 @@ app.post("/api", async (request, response) => {
     return response.status(202).json("done");
 })
 
-app.listen(5000, () => { console.log("Server started on port 5000") })
+app.listen(5500, () => { console.log("Server started on port 5500") })
