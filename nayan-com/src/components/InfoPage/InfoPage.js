@@ -19,7 +19,7 @@ function InfoPage() {
             headers: myHeaders,
             redirect: "follow",
         }
-        fetch("http://localhost:5500/vitals", options).then((response) => response.json())
+        fetch("http://localhost:5000/backendVitals", options).then((response) => response.json())
             .then(async (myJson) => {
                 console.log(myJson)
                 await setData(myJson)
@@ -35,17 +35,18 @@ function InfoPage() {
         setLoading(true)
     }
 
-    // useEffect(() => {
-    //     setInterval(() => {
-    //         onSubmit();
-    //     }, 5000);
-    // });
+    useEffect(() => {
+        setInterval(() => {
+            getData();
+            console.log("hi")
+        }, 20000);
+    }, []);
 
     return (
         <div className="ihomepage" >
             <Header />
             <div className="iseparator">
-                Patient Monitoring Redefined
+                An IoT project for the terminally ill patients.
             </div>
             <div className="ibutton">
                 <button defaultValue={false} onClick={() => onSubmit()} className="btn btn-primary my-3" value="Submit" >

@@ -7,7 +7,7 @@ const Header = () => {
         <div className="header" >
             <div className="logo" >
                 <img link="" src={nayanComLogo} alt="logo" />
-                <span className="logo-text"> Nayan <span style={{ color: 'black', fontWeight: '600' }}> Com </span> </span>
+                <span className="logo-text"> Nayan <span style={{ color: 'black', fontWeight: '500' }}> Com </span> </span>
             </div>
         </div >
     )

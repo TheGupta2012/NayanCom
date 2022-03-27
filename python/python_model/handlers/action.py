@@ -212,7 +212,7 @@ class ActionHandler:
 
     def play_sound(self, text):
 
-        print(text)
+        # print(text)
         randf = str(int((random.random() * 2600) % 2101))
         sound_fp = rf"data/sounds/{randf}.mp3"
         open(sound_fp, "w").close()
