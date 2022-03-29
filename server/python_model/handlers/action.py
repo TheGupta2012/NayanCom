@@ -80,7 +80,10 @@ class ActionHandler:
         # this is running in the top level directory of the server
         # and we have the relative path as available in the server
         # root
-        file = open(r"data/vitals_face.json", "w")
+        file = open(
+            r"/home/harshit/college/Sem-6/IOT/Project/NayanCom/server/data/vitals_face.json",
+            "w",
+        )
         dump(data, file)
         file.close()
 
@@ -216,7 +219,7 @@ class ActionHandler:
 
         # print(text)
         randf = str(int((random.random() * 2600) % 2101))
-        sound_fp = rf"data/sounds/{randf}.mp3"
+        sound_fp = rf"/home/harshit/college/Sem-6/IOT/Project/NayanCom/server/data/sounds/{randf}.mp3"
         open(sound_fp, "w").close()
         tts = gTTS(text, lang="en")
 
