@@ -61,29 +61,31 @@ class ActionHandler:
 
         # here, we need to lock the file
         # model_vars.json and then update it
-        lock = InterProcessLock("data/vitals_face.json")
-        acquired = lock.acquire()
+        # lock = InterProcessLock("data/vitals_face.json")
+        # acquired = lock.acquire()
 
-        # # site may be reading the file
-        while not acquired:
-            acquired = lock.acquire(timeout=1)
+        # # # site may be reading the file
+        # while not acquired:
+        #     acquired = lock.acquire(timeout=1)
 
-        try:
-            # update the data
-            data = {
-                "patient": {
-                    "in_view": patient.in_view,
-                    "vitals_detected": patient.vitals_detected,
-                }
+        # try:
+        # update the data
+        data = {
+            "patient": {
+                "in_view": patient.in_view,
+                "vitals_detected": patient.vitals_detected,
             }
+        }
 
-            # this is running in the top level directory
-            file = open(r"data/vitals_face.json", "w")
-            dump(data, file)
-            file.close()
+        # this is running in the top level directory of the server
+        # and we have the relative path as available in the server
+        # root
+        file = open(r"data/vitals_face.json", "w")
+        dump(data, file)
+        file.close()
 
-        finally:
-            lock.release()
+        # finally:
+        #     lock.release()
 
     def handle_blinks(self, cv_model):
         # this will handle the state of cv model

@@ -1,4 +1,5 @@
 from json import load
+from ..handlers.alert import send_alerts
 
 
 class Patient:
@@ -18,6 +19,8 @@ class Caretaker:
     def __init__(self) -> None:
         self.email, self.phone, self.em_service = self._generate_details()
 
+        self._send_notification()
+
     def _generate_details(self):
 
         # no locks required as this is done only after the model is
@@ -36,3 +39,9 @@ class Caretaker:
         em_service = "example@gmail.com"
 
         return (email, phone, em_service)
+
+    def _send_notification(self):
+        text = "Hi, thank you for registering to NayanCom!\n For utilizing all the features, \
+            please set up the application for your patient."
+
+        send_alerts(text, self.email)

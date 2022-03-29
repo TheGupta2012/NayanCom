@@ -1,6 +1,6 @@
 const bodyParser = require('body-parser');
 const express = require('express');
-// const { exec } = require('child-process');
+const { exec  }= require('child_process');
 const app = express();
 var cors = require('cors') // New
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -14,18 +14,19 @@ const dataVitals = JSON.parse(fs.readFileSync(path.join(__dirname, './data/vital
 var python_start = false;
 app.get("/backendVitals", async (req, res) => {
     console.log(dataVitals);
-    // if (python_start == false) {
-    //     // run the file 
-    //     var yourscript = exec('bash run_python.sh',
-    //         (error, stdout, stderr) => {
-    //             console.log(stdout);
-    //             console.log(stderr);
-    //             if (error !== null) {
-    //                 console.log(`exec error: ${error}`);
-    //             }
-    //         });
-    //     python_start = true;
-    // }
+
+    if (python_start == false) {
+        // run the file 
+        var yourscript = exec('bash run_python.sh',
+            (error, stdout, stderr) => {
+                console.log(stdout);
+                console.log(stderr);
+                if (error !== null) {
+                    console.log(`exec error: ${error}`);
+                }
+            });
+        python_start = true;
+    }
     return res.json(dataVitals);
 })
 
