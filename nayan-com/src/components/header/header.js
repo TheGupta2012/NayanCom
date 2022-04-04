@@ -6,8 +6,7 @@ const Header = () => {
     return (
         <div className="header" >
             <div className="logo" >
-                <img link="" src={nayanComLogo} alt="logo" />
-                <span className="logo-text"> Nayan <span style={{ color: 'black', fontWeight: '500' }}> Com </span> </span>
+                <img link="" src={nayanComLogo} alt="logo" />                
             </div>
         </div >
     )

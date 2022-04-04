@@ -30,7 +30,7 @@ import json
 pid = {"id": os.getpid()}
 
 with open(
-    r"/home/harshit/college/Sem-6/IOT/Project/NayanCom/server/data/pid_cv.json",
+    r"data/pid_cv.json",
     "w",
 ) as f:
     json.dump(pid, f)
@@ -53,7 +53,7 @@ cv_data_model = CVDataHandler()
 action_model = ActionHandler(caretaker)
 
 Patient.in_view = False
-action_model.update_model_vars(Patient)
+action_model.update_model_vars(Patient, vitals=False, blinks=False)
 
 
 # cv model initial
@@ -115,6 +115,7 @@ while True:
         # )
 
         # cv2.imshow("Frame", frame)
+
         key = cv2.waitKey(1) & 0xFF
 
         # if the `q` key was pressed, break from the loop
@@ -147,4 +148,4 @@ while True:
         action_model.handle_blinks(Patient, ear_model.previous_view, cv_data_model)
         Patient.blink_registered = False
         ear_model.previous_view = Patient.in_view
-        action_model.update_model_vars(Patient)
+        action_model.update_model_vars(Patient, vitals=False, blinks=True)

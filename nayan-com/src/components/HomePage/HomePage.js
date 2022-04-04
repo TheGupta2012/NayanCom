@@ -11,8 +11,7 @@ function HomePage() {
         <div className="homepage" >
             <Header />
             <div className="separator">
-                {/* An IoT project for the terminally ill patients. */}
-                Redefining patient well being.
+                An IoT project for paralysed patients
             </div>
             <div className="body" >
                 <div className="leftBody">

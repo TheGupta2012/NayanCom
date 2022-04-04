@@ -52,7 +52,7 @@ function InfoPage() {
 
     useEffect(() => {
         setInterval(() => {
-            getData("backendVitals");
+            getData("readVitals");
             console.log("hi")
         }, 7000);
     }, []);

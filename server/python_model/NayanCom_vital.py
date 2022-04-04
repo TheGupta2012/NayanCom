@@ -10,11 +10,11 @@ import os
 import json
 import time
 
-# save the pid for killing
+# save the pid for killing process
 pid = {"id": os.getpid()}
 
 with open(
-    r"/home/harshit/college/Sem-6/IOT/Project/NayanCom/server/data/pid_vitals.json",
+    r"data/pid_vitals.json",
     "w",
 ) as f:
     json.dump(pid, f)
@@ -29,14 +29,14 @@ update_vitals = False
 total_readings = 0
 
 vital_data_model = VitalDataHandler()
-REPORTING_TIME = 10
+REPORTING_TIME = 10  # if there is anything
 
 # action
 action_model = ActionHandler(caretaker)
 
 # Initiate
 Patient.vitals_detected = False
-action_model.update_model_vars(Patient)  # as False
+action_model.update_model_vars(Patient, vitals=False, blinks=False)  # as False
 
 
 # for vitals
@@ -71,7 +71,7 @@ while True:
             # data handler will update the value of Patient vitals detected inside
             # the model, here just keep on sending vitals in interval of 30 seconds
 
-        if total_readings >= 300:  # every 5 minutes
+        if total_readings >= 300:  # every 5 minutes force update
             update_vitals = True
             total_readings = 0
 
@@ -88,4 +88,4 @@ while True:
         if update_vitals:
             update_vitals = False
 
-        action_model.update_model_vars(Patient)
+        action_model.update_model_vars(Patient, vitals=True, blinks=False)

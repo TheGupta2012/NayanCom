@@ -1,97 +1,17 @@
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500&display=swap");
 
 .header {
-  background: #8f8f8f;
+  background: #696969;
   width: 100%;
-  height: 4rem;
-  display: flex;
-  justify-content: space-between;
+  height: 5rem;
   padding: 10px 10px 10px 10px;
-  box-sizing: border-box;
 }
 
 .logo {
-  display: flex;
-  align-items: center;
-  width: 450px;
+  display: block;
+  align-content: center;
 }
 
-.header img {
-  padding-left: 30px;
-  margin-right: 40px;
-  padding-top: 0px;
-  height: 40px;
-  width: auto;
-}
-
-.logo-text {
-  font-family: "Noto Sans JP", sans-serif;
-  color: #ffffff;
-  font-size: 1.4rem;
-  font-weight: 600;
-}
-
-.signup {
-  padding-right: 100px;
-  align-self: center;
-}
-
-@media (max-width: 870px) {
-  .header {
-    height: 5rem;
-    display: flex;
-    justify-content: space-between;
-    padding: 8px;
-    padding-bottom: 10px;
-  }
-
-  .logo {
-    display: flex;
-    align-items: center;
-    width: 20rem;
-  }
-
-  .header img {
-    padding-left: 25px;
-    padding-right: 10px;
-    height: 30px;
-    width: auto;
-  }
-  .logo-text {
-    font-family: "Noto Sans JP", sans-serif;
-    color: #686868;
-    font-size: 1.4rem;
-    font-weight: 400;
-  }
-
-  .signup {
-    padding-right: 100px;
-    align-self: center;
-  }
-}
-
-@media (max-width: 444px) {
-  .logo {
-    display: flex;
-    align-items: center;
-    width: 20rem;
-  }
-
-  .header img {
-    padding-left: 25px;
-    padding-right: 10px;
-    height: 30px;
-    width: auto;
-  }
-  .logo-text {
-    font-family: "Noto Sans JP", sans-serif;
-    color: #686868;
-    font-size: 1.1rem;
-    font-weight: 400;
-  }
-
-  .signup {
-    padding-right: 100px;
-    align-self: center;
-  }
+.logo img {
+  width: 280px;
 }

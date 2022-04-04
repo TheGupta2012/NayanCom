@@ -11,6 +11,24 @@ app.use(cors());
 
 var python_start = false;
 
+const reset_patient = {
+        "patient" : {
+            "in_view" : false,
+            "vitals_detected" : false
+        }
+    }
+// write the details of caretaker to the file 
+const writeToFile = async (data, path) => {
+    const json = JSON.stringify(data, null, 2)
+    await fs.writeFile(path, json, (err) => {
+        if (err) {
+            console.error(err)
+            throw err
+        }
+        console.log('Saved data to file.')
+    })
+}
+
 // route for the starting of python script and the reading of patient vars
 app.get("/backendVitals", async (req, res) => {
     var dataVitals = JSON.parse(fs.readFileSync(path.join(__dirname, './data/vitals_face.json')));
@@ -28,6 +46,12 @@ app.get("/backendVitals", async (req, res) => {
             });
         python_start = true;
     }
+    return res.json(dataVitals);
+})
+
+app.get("/readVitals", async (req, res) => {
+    var dataVitals = JSON.parse(fs.readFileSync(path.join(__dirname, './data/vitals_face.json')));
+    console.log(dataVitals);
     return res.json(dataVitals);
 })
 
@@ -59,22 +83,12 @@ app.get("/stopScript", async (req, res) => {
                 }
             });
         }
-        
         python_start = false;
     }
+    writeToFile(reset_patient, "./data/vitals_face.json");
 })
 
-// write the details of caretaker to the file 
-const writeToFile = async (data, path) => {
-    const json = JSON.stringify(data, null, 2)
-    await fs.writeFile(path, json, (err) => {
-        if (err) {
-            console.error(err)
-            throw err
-        }
-        console.log('Saved data to file.')
-    })
-}
+
 
 app.post("/api", async (request, response) => {
     console.log(request.body);

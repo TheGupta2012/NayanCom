@@ -4,7 +4,7 @@ from .alert import send_alerts
 
 # for locking
 from fasteners import InterProcessLock  # platform agnostic
-from json import dump
+from json import dump, load
 
 # for text to speech
 from gtts import gTTS
@@ -26,39 +26,49 @@ class ActionHandler:
         self.email = caretaker.email
         self.phone = caretaker.phone
 
-    def update_model_vars(self, patient):
+    def update_model_vars(self, patient, vitals, blinks):
 
         # here, we need to lock the file
         # model_vars.json and then update it
-        lock = InterProcessLock(
-            r"/home/harshit/college/Sem-6/IOT/Project/NayanCom/server/data/vitals_face.json"
-        )
+        lock = InterProcessLock(r"data/vitals_face.json")
         acquired = lock.acquire()
 
         # site may be reading the file
         while not acquired:
             acquired = lock.acquire(timeout=1)
-
-        try:
-
-            # update the data
-            data = {
-                "patient": {
-                    "in_view": patient.in_view,
-                    "vitals_detected": patient.vitals_detected,
-                }
+        # update the data
+        data = {
+            "patient": {
+                "in_view": patient.in_view,
+                "vitals_detected": patient.vitals_detected,
             }
-
+        }
+        try:
+            # just add your data and not the other one's
+            with open(
+                r"data/vitals_face.json",
+                "r",
+            ) as reader:
+                orig_data = load(reader)
+                print(orig_data)
+                if vitals:
+                    data["patient"]["in_view"] = orig_data["patient"]["in_view"]
+                if blinks:
+                    data["patient"]["vitals_detected"] = orig_data["patient"][
+                        "vitals_detected"
+                    ]
             # this is running in the top level directory of the server
             # and we have the relative path as available in the server
             # root
+            reader.close()
+
             with open(
-                r"/home/harshit/college/Sem-6/IOT/Project/NayanCom/server/data/vitals_face.json",
+                r"data/vitals_face.json",
                 "w",
-            ) as file:
-                dump(data, file)
+            ) as writer:
+                dump(data, writer)
             # print("File updated!")
-            file.close()
+            writer.close()
 
         finally:
             lock.release()
@@ -71,7 +81,6 @@ class ActionHandler:
         prev_state = cv_model.prev_state
         curr_state = cv_model.curr_state
 
-        # print("Curr state is :", curr_state)
         text = {"play": "", "text": ""}
 
         em_state = False
@@ -258,6 +267,7 @@ class ActionHandler:
         os.remove(sound_fp)
 
 
+# just a small function for the blink sounds
 def blink_detect():
     pygame.mixer.init()
     notif = pygame.mixer.Sound(r"data/sounds/blink.wav")
