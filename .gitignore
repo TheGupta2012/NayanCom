@@ -128,5 +128,7 @@ dmypy.json
 
 # JS things
 website/node_modules
+server/node_modules
+nayan-com/node_modules
 /.pnp
 .pnp.js
