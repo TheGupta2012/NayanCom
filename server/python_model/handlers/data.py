@@ -24,12 +24,14 @@ class CVDataHandler:
         in_view = data["in_view"]
         patient.in_view = in_view
 
-        if in_view:
+        if patient.in_view:
             # try to do something
             blinks = data["num_blinks"]
             idle = data["idle"]
             patient.requesting = not idle
             self._update_states(self.curr_state, blinks, idle)
+        else:
+            self.reset_model()
 
     # based on the CV Blink model on paper
 
@@ -39,13 +41,17 @@ class CVDataHandler:
         # if idle, every option is reset
 
         # update the state of the model
-
         if idle:
             self.col = None
-            if self.prev_state == CV.GOT_COL:
+            if curr_state == CV.GOT_COL:
                 self.curr_state = CV.CONFIRM_ROW
-            elif self.prev_state != CV.IDLE:
+            elif curr_state == CV.ACTIVATE:
+                self.curr_state = CV.IDLE
+            elif curr_state != CV.IDLE:
                 self.curr_state = CV.ACTIVATE
+                self.row = None
+            else:
+                self.curr_state = CV.IDLE
                 self.row = None
 
         elif blinks >= 5:

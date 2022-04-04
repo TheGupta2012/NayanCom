@@ -34,14 +34,12 @@ class Caretaker:
 
         email = data["email"]
         phone = data["phone"]
-
-        # this is not sure...
         em_service = "example@gmail.com"
 
         return (email, phone, em_service)
 
     def _send_notification(self):
-        text = "Hi, thank you for registering to NayanCom!\n For utilizing all the features, \
+        text = "Hi, thank you for registering to NayanCom and maintaining your patient's well being!\n For utilizing all the features, \
             please set up the application for your patient."
 
-        send_alerts(text, self.email)
+        send_alerts(text, self.email, False, "Welcome to NayanCom!")

@@ -17,12 +17,15 @@ class EarModel:
     def __init__(self) -> None:
         self.total_blinks = 0
         self.counter = 0
+        self.views = 0
         self.right_threshold = 120
         self.right_limit = 300
         self.frame_count = 0
+        self.previous_view = False
 
     def reset_data(self):
         self.counter = 0
+        self.views = 0
         self.frame_count = 0
         self.total_blinks = 0
         self.right_threshold = 120

@@ -9,10 +9,11 @@ const fs = require('fs');
 const path = require('path');
 app.use(cors());
 
-const dataVitals = JSON.parse(fs.readFileSync(path.join(__dirname, './data/vitals_face.json')));
-
 var python_start = false;
+
+// route for the starting of python script and the reading of patient vars
 app.get("/backendVitals", async (req, res) => {
+    var dataVitals = JSON.parse(fs.readFileSync(path.join(__dirname, './data/vitals_face.json')));
     console.log(dataVitals);
 
     if (python_start == false) {
@@ -30,6 +31,40 @@ app.get("/backendVitals", async (req, res) => {
     return res.json(dataVitals);
 })
 
+// stopping the python scripts 
+app.get("/stopScript", async (req, res) => {
+    var pid_vitals = JSON.parse(fs.readFileSync(path.join(__dirname, './data/pid_vitals.json')));
+    var pid_cv = JSON.parse(fs.readFileSync(path.join(__dirname, './data/pid_cv.json')));
+
+    if (python_start == true) {
+        // kill the scripts
+        if (pid_vitals != "None")
+        {   var killscript1 = exec(`kill ${pid_vitals.id}`,
+                (error, stdout, stderr) => {
+                    console.log(stdout);
+                    console.log(stderr);
+                    if (error !== null) {
+                        console.log(`exec error: ${error}`);
+                    }
+                });
+        }
+        if(pid_cv != "None")
+        {
+        var killscript2 = exec(`kill ${pid_cv.id}`,
+            (error, stdout, stderr) => {
+                console.log(stdout);
+                console.log(stderr);
+                if (error !== null) {
+                    console.log(`exec error: ${error}`);
+                }
+            });
+        }
+        
+        python_start = false;
+    }
+})
+
+// write the details of caretaker to the file 
 const writeToFile = async (data, path) => {
     const json = JSON.stringify(data, null, 2)
     await fs.writeFile(path, json, (err) => {

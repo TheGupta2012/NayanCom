@@ -1,31 +1,3 @@
-# 1. Reads the data of the -
-# a. Patient
-# b. VitalDataHandler
-# c. CVDataHandler
-
-# and acc to the states of the models, generates a text field for the
-# vitals and a text field for the request (if any)
-
-# 2. Uses the patient's in_view and vital_detected property
-#    to reset the models, if set. If any one of the property is not
-#    set, both models are reset and a notification to the caretaker sent
-#    (only when the CHANGE happens, from True to False)
-#    After this, the site is updated so that when the person comes, they can
-#    see while re-adjusting the elements
-
-# if the in_view and vital_detected are True ( both ) then -
-
-# 3. Uses the text fields and sends the message to the caretaker via the
-#    smtp server or the twilio API for the message. If there is an emergency
-#    situation, also sends a call to the emergency services with the
-#    LOCATION of the request and the vitals of the patient.
-
-
-# 4. After the optional sending of the messages, it will update the states of
-#    the models accordingly by calling the reset_model function
-
-# 5. Repeat
-
 from ..models.mappers import REQUEST_MAP
 from ..models.mappers import CV, Vitals
 from .alert import send_alerts
@@ -54,43 +26,44 @@ class ActionHandler:
         self.email = caretaker.email
         self.phone = caretaker.phone
 
-        # not really sure...
-        # self.em_phone = caretaker.em_service
-
     def update_model_vars(self, patient):
 
         # here, we need to lock the file
         # model_vars.json and then update it
-        # lock = InterProcessLock("data/vitals_face.json")
-        # acquired = lock.acquire()
-
-        # # # site may be reading the file
-        # while not acquired:
-        #     acquired = lock.acquire(timeout=1)
-
-        # try:
-        # update the data
-        data = {
-            "patient": {
-                "in_view": patient.in_view,
-                "vitals_detected": patient.vitals_detected,
-            }
-        }
-
-        # this is running in the top level directory of the server
-        # and we have the relative path as available in the server
-        # root
-        file = open(
-            r"/home/harshit/college/Sem-6/IOT/Project/NayanCom/server/data/vitals_face.json",
-            "w",
+        lock = InterProcessLock(
+            r"/home/harshit/college/Sem-6/IOT/Project/NayanCom/server/data/vitals_face.json"
         )
-        dump(data, file)
-        file.close()
+        acquired = lock.acquire()
 
-        # finally:
-        #     lock.release()
+        # site may be reading the file
+        while not acquired:
+            acquired = lock.acquire(timeout=1)
 
-    def handle_blinks(self, cv_model):
+        try:
+
+            # update the data
+            data = {
+                "patient": {
+                    "in_view": patient.in_view,
+                    "vitals_detected": patient.vitals_detected,
+                }
+            }
+
+            # this is running in the top level directory of the server
+            # and we have the relative path as available in the server
+            # root
+            with open(
+                r"/home/harshit/college/Sem-6/IOT/Project/NayanCom/server/data/vitals_face.json",
+                "w",
+            ) as file:
+                dump(data, file)
+            # print("File updated!")
+            file.close()
+
+        finally:
+            lock.release()
+
+    def handle_blinks(self, patient, previous_view, cv_model):
         # this will handle the state of cv model
 
         # only called when we are in_view
@@ -98,16 +71,29 @@ class ActionHandler:
         prev_state = cv_model.prev_state
         curr_state = cv_model.curr_state
 
+        # print("Curr state is :", curr_state)
         text = {"play": "", "text": ""}
 
         em_state = False
+
+        # email is to be sent only on a flip and
+        # not continuously
+        if not patient.in_view:
+            if previous_view:
+                text = """Patient's face is not in view. 
+                        Please set up the device again."""
+                send_alerts(text, self.email)
+                cv_model.reset_model()
+            else:
+                cv_model.reset_model()
+            return
 
         if curr_state == CV.IDLE:
             if prev_state != CV.IDLE:
                 # need to inform them
                 text["play"] = "Not sure if you're there. Deactivating model for now."
             else:
-                text["play"] = "Not started now."
+                text["play"] = "Not started."
             cv_model.reset_model()
         else:
 
@@ -132,9 +118,18 @@ class ActionHandler:
                 text["play"] += "Please blink once to confirm.\n"
 
             elif curr_state == CV.CONFIRM_ROW:
-                text["play"] = (
-                    confirmation + " Row " + str(row_selected) + " confirmed!\n"
-                )
+                if prev_state == CV.GOT_ROW:
+                    text["play"] = (
+                        confirmation
+                        + " Row "
+                        + str(row_selected)
+                        + " confirmed!\n"
+                        + "Please select a column."
+                    )
+                elif prev_state == CV.GOT_COL:
+                    text[
+                        "play"
+                    ] = "Sorry, we could not confirm your column selection. Can you select again?"
 
             elif curr_state == CV.GOT_COL:
                 text["play"] = (
@@ -191,7 +186,13 @@ class ActionHandler:
         # services
 
         curr_state = vital_model.state
-        print("Current state of model :", curr_state)
+
+        if not patient.vitals_detected:
+            text = f"""Patient vitals not being detected. 
+                        Please set up the device again."""
+            send_alerts(text, self.email)
+            vital_model.reset_model()
+            return
 
         if curr_state == Vitals.NORMAL:
             # do not send the data
@@ -216,10 +217,23 @@ class ActionHandler:
         vital_model.reset_model()
 
     def play_sound(self, text):
+        """To play the sounds for the patient interaction
 
-        # print(text)
+        NOTE : if we have an idle state, no point in
+               telling that to the patient.
+        """
+
+        if "Not started" in text:
+            pygame.mixer.init()
+            background = pygame.mixer.Sound(r"data/sounds/constant2.wav")
+            background.play(fade_ms=1000)
+            time.sleep(4)
+            pygame.quit()
+            return
+
         randf = str(int((random.random() * 2600) % 2101))
-        sound_fp = rf"/home/harshit/college/Sem-6/IOT/Project/NayanCom/server/data/sounds/{randf}.mp3"
+        sound_fp = rf"data/sounds/{randf}.mp3"
+
         open(sound_fp, "w").close()
         tts = gTTS(text, lang="en")
 
@@ -228,11 +242,25 @@ class ActionHandler:
         audio = MP3(sound_fp)
         t = audio.info.length
 
+        # play the notification
+        pygame.mixer.init()
+        notif = pygame.mixer.Sound(r"data/sounds/notification.wav")
+        notif.play(fade_ms=500)
+        time.sleep(1)
+
+        # play the saved text
         pygame.mixer.init()
         pygame.mixer.music.load(sound_fp)
-        pygame.mixer.music.play()
-
+        pygame.mixer.music.play(fade_ms=500)
         time.sleep(t)
         pygame.quit()
 
         os.remove(sound_fp)
+
+
+def blink_detect():
+    pygame.mixer.init()
+    notif = pygame.mixer.Sound(r"data/sounds/blink.wav")
+    notif.play(fade_ms=500)
+    time.sleep(1)
+    return
