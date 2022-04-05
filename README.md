@@ -7,9 +7,7 @@ A patient monitoring and well being assistant.
 - **Team Members** : [Tabishi Singh](https://github.com/TabishiSingh06) | [Aryaman Sharma](https://github.com/aryamansharma01) | [Harshit Gupta](https://github.com/TheGupta2012) 
 
 This project aims to include a new layer of usability to already available automation assistants. Siri, Cortana, Alexa all have voice based input mechanisms but we aim to extend this to the human eye. Given a physically handicapped/paralysed patient, our project would enable them to perform basic daily actions and allow low-cost vital monitoring.
-<img width="960" alt="image" src="https://user-images.githubusercontent.com/69653249/161674758-aa2eadcb-867a-44e8-855f-895143559a48.png">
-<img width="960" alt="image" src="https://user-images.githubusercontent.com/69653249/161682769-960113d0-761b-405d-8e9d-c5e330096a58.png">
-
+<img width="960" alt="image" src="https://user-images.githubusercontent.com/69653249/161682962-66e713ac-7335-42f5-a940-101f2abce485.png">
   
 ## Motivation 
 The project aims to solve the human computer interaction (HCI) problem for people with temporary or permanent motion and speech disabilities. Our approach uses the blinking actions of a user to allow easy communication with their caretakers and medical services for a better patient experience. Along with the communication aspect, we also have a patient monitoring aspect where the patient’s essential vitals are tracked. For these two functionalities, an analysis of computer vision models and human vital sensors such as heart sensors are required.
@@ -39,5 +37,8 @@ The project aims to solve the human computer interaction (HCI) problem for peopl
 - The website runs on a nodeJS server and initially reads the caretaker’s contact info from the homepage. 
 - This contact info is used to alert the caretaker when the person makes a choice from the NayanCommand chart.
 - The website communicates with the python model using JSON files. The site alerts the caretaker with the status of the vitals, commands which the patient issues and whether there is an emergency situation or not.
+  
+  <img width="960" alt="image" src="https://user-images.githubusercontent.com/69653249/161683014-b54fce1f-eea8-40e3-a9f8-994619087a28.png">
+
 
   
