@@ -1,9 +1,9 @@
 from enum import Enum
 
 REQUEST_MAP = {
-    1: {1: "water", 2: "food", 3: "lights"},
+    1: {1: "water", 2: "food", 3: "wash room"},
     2: {1: "bodyache", 2: "cold and cough", 3: "head ache"},
-    3: {1: "limb pain", 2: "fatigue", 3: "chest pain"},
+    3: {1: "lights", 2: "fan", 3: "chest pain"},
 }
 
 

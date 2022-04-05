@@ -6,7 +6,7 @@ from .alert import send_alerts
 from fasteners import InterProcessLock  # platform agnostic
 from json import dump, load
 
-# for text to speech
+# for text tos speech
 from gtts import gTTS
 import random
 import os
@@ -18,8 +18,7 @@ from mutagen.mp3 import MP3
 class ActionHandler:
 
     greets = ["Hey there", "Hi", "Hey", "Hi there"]
-
-    confirms = ["Alright!", "Perfect!", "Okay sure!", "Sure!", "Okay!", "Awesome!"]
+    confirms = ["Alright!", "Perfect!", "Okay sure!", "Sure!", "Okay!"]
 
     def __init__(self, caretaker) -> None:
         # network details
