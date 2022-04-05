@@ -19,7 +19,7 @@ The project aims to solve the human computer interaction (HCI) problem for peopl
 - The OpenCV model uses a metric called *Eye Aspect Ratio* for the detection of the eye blinks, as proposed in the paper [Real-Time Eye Blink Detection using Facial Landmarks](http://vision.fe.uni-lj.si/cvww2016/proceedings/papers/05.pdf). 
 - Our system has an initial time window of 5 seconds. During the time window, if any blink is detected, the window size is increased by a second to accomodate more blinks by a user. At the end of a time chunk, up to a limit of 12 seconds, the blinks of the user are registered.
 
-  <img width="10%" height="25%" alt="image" src="https://user-images.githubusercontent.com/54472596/161683149-85018dec-1a04-40ac-984d-d850cc85f5aa.png">
+  <img width="960" alt="image" src="https://user-images.githubusercontent.com/54472596/161683149-85018dec-1a04-40ac-984d-d850cc85f5aa.png">
 
 ### ▶️ Python Model
 - Our model consists of two action handlers.
@@ -29,7 +29,7 @@ The project aims to solve the human computer interaction (HCI) problem for peopl
      - **VitalDataHandler** aims to model the periodic vital data coming from the user and updates model state depending on  the inputs
   2. **Action Handler** processes the state of the data models. It is responsible for the audio interface between the user and the system. Depending on the states and the inputs, it also produces an alert to the caretaker.
   
-  <img width="10%" height="25%" alt="image" src="https://user-images.githubusercontent.com/54472596/161683332-be55e94d-6099-4c4f-aa14-03d3376c5772.png">
+  <img width="960" alt="image" src="https://user-images.githubusercontent.com/54472596/161683332-be55e94d-6099-4c4f-aa14-03d3376c5772.png">
 
 
 ### ▶️ Vital Detection
@@ -37,7 +37,7 @@ The project aims to solve the human computer interaction (HCI) problem for peopl
  - The sensor was connected to an Arduino Nano for processing, and an  HC-05 bluetooth module for communicating patient vitals to our model.
  - Data is periodically sent to the data handler, following which the appropriate action is taken.
 
-  <img width="10%" height="25%" alt="image" src="https://user-images.githubusercontent.com/54472596/161683363-70b31bcc-db09-4e9d-9a14-909d6289ea93.png">
+  <img width="960" alt="image" src="https://user-images.githubusercontent.com/54472596/161683363-70b31bcc-db09-4e9d-9a14-909d6289ea93.png">
 
 ### ▶️ Website 
 - For the user interface we made a website using the React.js framework.
