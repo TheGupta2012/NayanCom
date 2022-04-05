@@ -57,7 +57,12 @@ action_model.update_model_vars(Patient, vitals=False, blinks=False)
 
 
 # cv model initial
-vs = VideoStream(src=0).start()
+# vs = VideoStream(src=1).start()
+# vs = VideoStream(src=0).start()
+vs = VideoStream(src=2).start()
+# vs.stream.set(cv2.CAP_PROP_FRAME_WIDTH, 720)
+# vs.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+# vs.start()
 while True:
 
     try:
@@ -104,17 +109,17 @@ while True:
                 # reset the eye frame counter
                 ear_model.counter = 0
 
-        # cv2.putText(
-        #     frame,
-        #     "Blinks: {}".format(ear_model.total_blinks),
-        #     TEXT_CONFIG[0],
-        #     TEXT_CONFIG[1],
-        #     TEXT_CONFIG[2],
-        #     TEXT_CONFIG[3],
-        #     TEXT_CONFIG[4],
-        # )
+        cv2.putText(
+            frame,
+            "Blinks: {}".format(ear_model.total_blinks),
+            TEXT_CONFIG[0],
+            TEXT_CONFIG[1],
+            TEXT_CONFIG[2],
+            TEXT_CONFIG[3],
+            TEXT_CONFIG[4],
+        )
 
-        # cv2.imshow("Frame", frame)
+        cv2.imshow("Frame", frame)
 
         key = cv2.waitKey(1) & 0xFF
 

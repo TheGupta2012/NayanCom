@@ -7,7 +7,7 @@ import cv2
 (rStart, rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
 
 EYE_AR_THRESH = 0.25
-EYE_AR_CONSEC_FRAMES = [10, 25]
+EYE_AR_CONSEC_FRAMES = [20, 45]
 
 # for drawing
 TEXT_CONFIG = [(10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2]
@@ -18,8 +18,8 @@ class EarModel:
         self.total_blinks = 0
         self.counter = 0
         self.views = 0
-        self.right_threshold = 120
-        self.right_limit = 300
+        self.right_threshold = 150
+        self.right_limit = 360
         self.frame_count = 0
         self.previous_view = False
 
