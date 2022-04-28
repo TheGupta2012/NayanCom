@@ -152,7 +152,7 @@ class ActionHandler:
                 if row_selected == 1:
                     # discomfort does not entail a greeting
                     text["play"] = (
-                        confirmation + " Someone will be here with you shortly!"
+                        confirmation + " Someone will be here with you shortly."
                     )
                     text["text"] = (
                         "Patient requires "
@@ -162,12 +162,15 @@ class ActionHandler:
                 else:
                     text[
                         "play"
-                    ] = "Sorry to know that, someone will be here shortly to attend to you."
-                    text["text"] = (
-                        "The patient is experiencing "
-                        + REQUEST_MAP[row_selected][col_selected]
-                        + ". Please reach out to them.\n"
-                    )
+                    ] = "Okay, someone will be here shortly to attend to you."
+
+                    query = REQUEST_MAP[row_selected][col_selected]
+
+                    if query not in ["lights", "fan"]:
+                        text["text"] = "The patient is experiencing "
+                    else:
+                        text["text"] = "The patient would to like to toggle the "
+                    text["text"] += query + ". Please reach out to them.\n"
 
                 # here, the alert is sent and we need to reset our models
                 cv_model.reset_model()
