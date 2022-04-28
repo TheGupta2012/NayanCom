@@ -28,7 +28,7 @@ class Caretaker:
 
         # note that path is relative to the server not the
         # python model anymore
-        details_path = r"/home/harshit/college/Sem-6/IOT/Project/NayanCom/server/data/contact_details.json"
+        details_path = r"data/contact_details.json"
         with open(details_path) as file:
             data = load(file)
 

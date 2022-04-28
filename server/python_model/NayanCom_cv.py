@@ -57,14 +57,11 @@ action_model.update_model_vars(Patient, vitals=False, blinks=False)
 
 
 # cv model initial
-# vs = VideoStream(src=1).start()
-# vs = VideoStream(src=0).start()
-vs = VideoStream(src=2).start()
-# vs.stream.set(cv2.CAP_PROP_FRAME_WIDTH, 720)
-# vs.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-# vs.start()
+try:
+    vs = VideoStream(src=0).start()
+except:
+    vs = VideoStream(src=2).start()
 while True:
-
     try:
         frame = vs.read()
         frame = imutils.resize(frame, width=450)
@@ -129,11 +126,10 @@ while True:
         # if we have exhausted the time limit
         if ear_model.frame_count > ear_model.right_threshold:
             # more than 50% of the times we are in view
-            if ear_model.views >= int(0.5 * ear_model.right_threshold):
+            if ear_model.views >= int(0.75 * ear_model.right_threshold):
                 Patient.in_view = True
             else:
                 Patient.in_view = False
-
             # TRY TO REGISTER THE NUMBER OF BLINKS
             cv_data = {
                 "in_view": Patient.in_view,
