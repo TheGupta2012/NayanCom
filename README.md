@@ -9,7 +9,7 @@ A patient monitoring and well being assistant.
 This project aims to include a new layer of usability to already available automation assistants. Siri, Cortana, Alexa all have voice based input mechanisms but we aim to extend this to the human eye. Given a physically handicapped/paralysed patient, our project would enable them to perform basic daily actions and allow low-cost vital monitoring.
   
 
-<align="center"> https://user-images.githubusercontent.com/69653249/165913143-ba94b5a1-1d9e-454e-9619-cab22bc3113c.mp4 <>
+<p align="center"> <img src="https://user-images.githubusercontent.com/69653249/165913143-ba94b5a1-1d9e-454e-9619-cab22bc3113c.mp4" > <p>
 
 
 <p align="center"> <img width=60% alt="image" src="https://user-images.githubusercontent.com/69653249/161682962-66e713ac-7335-42f5-a940-101f2abce485.png"><p>
