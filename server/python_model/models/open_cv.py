@@ -28,7 +28,7 @@ class EarModel:
         self.views = 0
         self.frame_count = 0
         self.total_blinks = 0
-        self.right_threshold = 120
+        self.right_threshold = 150
 
 
 # utilities
