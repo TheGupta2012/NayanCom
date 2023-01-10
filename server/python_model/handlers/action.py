@@ -134,7 +134,7 @@ class ActionHandler:
                         + " confirmed!\n"
                         + "Please select a column."
                     )
-                elif prev_state == CV.GOT_COL:
+                elif prev_state in [CV.GOT_COL, CV.CONFIRM_ROW]:
                     text[
                         "play"
                     ] = "Sorry, we could not confirm your column selection. Can you select again?"
@@ -237,7 +237,7 @@ class ActionHandler:
         if "Not started" in text:
             pygame.mixer.init()
             background = pygame.mixer.Sound(r"data/sounds/constant2.wav")
-            background.play(fade_ms=1000)
+            background.play(fade_ms=200)
             time.sleep(4)
             pygame.quit()
             return
@@ -246,7 +246,7 @@ class ActionHandler:
         sound_fp = rf"data/sounds/{randf}.mp3"
 
         open(sound_fp, "w").close()
-        tts = gTTS(text, lang="en")
+        tts = gTTS(text, lang="en", tld="com", slow=False)
 
         # save and play
         tts.save(sound_fp)
@@ -262,7 +262,7 @@ class ActionHandler:
         # play the saved text
         pygame.mixer.init()
         pygame.mixer.music.load(sound_fp)
-        pygame.mixer.music.play(fade_ms=500)
+        pygame.mixer.music.play(fade_ms=200)
         time.sleep(t)
         pygame.quit()
 

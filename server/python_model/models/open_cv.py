@@ -6,12 +6,12 @@ import cv2
 (lStart, lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
 (rStart, rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
 
-EYE_AR_THRESH = 0.25
+EYE_AR_THRESH = 0.05
 EYE_AR_CONSEC_FRAMES = [18, 40]
 
 # for drawing
-TEXT_CONFIG = [(10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2]
-
+TEXT_CONFIG_1 = [(10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2]
+TEXT_CONFIG_2 = [(100, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2]
 # define data for the running of model
 class EarModel:
     def __init__(self) -> None:
@@ -28,7 +28,7 @@ class EarModel:
         self.views = 0
         self.frame_count = 0
         self.total_blinks = 0
-        self.right_threshold = 120
+        self.right_threshold = 150
 
 
 # utilities

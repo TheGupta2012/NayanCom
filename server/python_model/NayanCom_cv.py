@@ -15,7 +15,8 @@ from imutils.video import VideoStream
 from .models.open_cv import (
     EYE_AR_CONSEC_FRAMES,
     EYE_AR_THRESH,
-    TEXT_CONFIG,
+    TEXT_CONFIG_1,
+    TEXT_CONFIG_2,
     EarModel,
     get_cv_args,
     get_frame_ear,
@@ -27,15 +28,15 @@ import time
 import json
 
 # save the pid for killing
-pid = {"id": os.getpid()}
+# pid = {"id": os.getpid()}
 
-with open(
-    r"data/pid_cv.json",
-    "w",
-) as f:
-    json.dump(pid, f)
+# with open(
+#     r"data/pid_cv.json",
+#     "w",
+# ) as f:
+#     json.dump(pid, f)
 
-f.close()
+# f.close()
 
 caretaker = Caretaker()
 
@@ -89,7 +90,15 @@ while True:
             shape = face_utils.shape_to_np(predictor(gray, rect))
 
             ear = get_frame_ear(shape)
-
+            cv2.putText(
+                frame,
+                f"EAR : {ear}",
+                TEXT_CONFIG_2[0],
+                TEXT_CONFIG_2[1],
+                TEXT_CONFIG_2[2],
+                TEXT_CONFIG_2[3],
+                TEXT_CONFIG_2[4],
+            )
             if ear < EYE_AR_THRESH:
                 ear_model.counter += 1
             else:
@@ -109,11 +118,11 @@ while True:
         cv2.putText(
             frame,
             "Blinks: {}".format(ear_model.total_blinks),
-            TEXT_CONFIG[0],
-            TEXT_CONFIG[1],
-            TEXT_CONFIG[2],
-            TEXT_CONFIG[3],
-            TEXT_CONFIG[4],
+            TEXT_CONFIG_1[0],
+            TEXT_CONFIG_1[1],
+            TEXT_CONFIG_1[2],
+            TEXT_CONFIG_1[3],
+            TEXT_CONFIG_1[4],
         )
 
         cv2.imshow("Frame", frame)
